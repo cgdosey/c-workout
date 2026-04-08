@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>C-Workout</title>
+<style>
+:root{--bg:#0f0f11;--surface:#1a1a1f;--surface2:#24242b;--border:#2e2e38;--accent:#e8f048;--accent-dim:#b8c020;--text:#f0f0f4;--dim:#8888a0;--red:#ff4d4d;--orange:#ff9a3c;--blue:#4d9fff;--green:#4dff91;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+.app{max-width:980px;margin:0 auto;padding:16px}
+
+/* Header */
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 0 20px;flex-wrap:wrap;gap:12px}
+.logo{font-size:22px;font-weight:800;letter-spacing:-.5px}.logo span{color:var(--accent)}
+.stats{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.stat{text-align:center}.stat-val{font-size:20px;font-weight:700;color:var(--accent);line-height:1}.stat-lbl{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* Week nav */
+.week-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px}
+.week-info{text-align:center}
+.week-title{font-size:17px;font-weight:700}
+.week-phase{font-size:11px;color:var(--dim);margin-top:2px}
+.prog-bar{width:140px;height:4px;background:var(--surface2);border-radius:2px;margin:6px auto 0}
+.prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s}
+.prog-lbl{font-size:11px;color:var(--dim);margin-top:4px}
+.btn-icon{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.btn-icon:hover{background:var(--border)}.btn-icon:disabled{opacity:.3;cursor:default}
+
+/* Day selector */
+.day-tabs{display:flex;gap:8px;margin-bottom:16px}
+.day-tab{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface);cursor:pointer;text-align:center;transition:all .15s;font-size:13px;font-weight:600;color:var(--dim)}
+.day-tab:hover{background:var(--surface2);color:var(--text)}
+.day-tab.active{background:rgba(232,240,72,.1);border-color:var(--accent);color:var(--accent)}
+
+/* Workout tabs */
+.workout-tabs{display:flex;border-bottom:1px solid var(--border)}
+.wtab{padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:var(--dim);transition:all .15s;background:none;border-top:none;border-left:none;border-right:none}
+.wtab:hover{color:var(--text)}.wtab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* Panels */
+.workout-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:18px}
+.tab-content{display:none}.tab-content.active{display:block}
+
+/* Video compact row */
+.video-row{display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--surface);border-bottom:1px solid var(--border);text-decoration:none;color:inherit;transition:background .15s;cursor:pointer}
+.video-row:hover{background:var(--surface2)}
+.video-thumb{position:relative;width:100px;height:56px;border-radius:6px;overflow:hidden;background:#000;flex-shrink:0}
+.video-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.video-thumb-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)}
+.video-thumb-play svg{width:20px;height:20px;fill:#fff;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}
+.video-meta{flex:1;min-width:0}
+.video-title{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.video-sub{font-size:12px;color:var(--dim);margin-top:3px}
+.video-yt-btn{padding:7px 14px;border-radius:8px;background:#ff0000;color:#fff;font-size:12px;font-weight:700;white-space:nowrap;border:none;flex-shrink:0}
+.log-section{padding:14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.log-status{font-size:13px;color:var(--dim)}.log-status.done{color:var(--green)}
+.log-detail{font-size:12px;color:var(--dim);margin-top:2px}
+
+/* Boxing panel */
+.boxing-header{padding:16px 18px;border-bottom:1px solid var(--border)}
+.boxing-title-main{font-size:18px;font-weight:800;margin-bottom:4px}
+.boxing-subtitle{font-size:12px;color:var(--dim)}
+
+/* Stations */
+.stations{padding:14px 18px;display:grid;gap:10px}
+.station-card{background:var(--surface2);border-radius:10px;padding:14px 16px;border:2px solid transparent;transition:all .2s}
+.station-card.current{border-color:var(--accent);background:rgba(232,240,72,.06)}
+.station-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);margin-bottom:5px}
+.station-label.lbl-s1{color:#4d9fff}.station-label.lbl-s2{color:#c084fc}.station-label.lbl-s3{color:#fb923c}.station-label.lbl-fin{color:var(--red)}
+.station-text{font-size:14px;font-weight:600;line-height:1.4}
+
+/* Timer (inline) */
+.timer-section{border-top:1px solid var(--border)}
+.timer-main{padding:20px 18px;text-align:center}
+.timer-phase{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;color:var(--dim);min-height:18px}
+.timer-phase.warmup{color:#4d9fff}.timer-phase.work{color:var(--accent)}.timer-phase.rest{color:var(--blue)}.timer-phase.finisher{color:var(--red)}.timer-phase.getready{color:var(--orange)}
+.timer-round{font-size:12px;color:var(--dim);margin-bottom:8px;min-height:16px}
+.timer-countdown{font-size:64px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1;letter-spacing:-2px}
+.timer-countdown.warmup{color:#4d9fff}.timer-countdown.work{color:var(--accent)}.timer-countdown.rest{color:var(--blue)}.timer-countdown.done-clr{color:var(--green)}.timer-countdown.getready{color:var(--orange)}
+.timer-exercise{font-size:14px;font-weight:600;margin-top:10px;min-height:36px;color:var(--text);padding:0 20px;line-height:1.4}
+.timer-progress{margin:14px 18px 0;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.timer-progress-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .5s linear}
+.timer-controls{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 18px 16px;flex-wrap:wrap}
+.btn-tstart{padding:12px 32px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;border:none;background:var(--accent);color:#000;transition:all .15s}
+.btn-tstart:hover{background:var(--accent-dim)}
+.btn-tpause{padding:12px 32px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;border:none;background:var(--orange);color:#000}
+.btn-treset{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text)}
+.btn-tskip{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--dim)}
+.btn-tskip:hover,.btn-treset:hover{background:var(--border);color:var(--text)}
+.timer-settings{padding:10px 18px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--dim);border-top:1px solid var(--border)}
+.tset-item{display:flex;align-items:center;gap:5px}
+.tset-input{width:46px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:3px 6px;outline:none;text-align:center}
+.tset-input:focus{border-color:var(--accent)}
+.tset-sep{color:var(--border);margin:0 4px}
+.timer-settings-wrap{overflow:hidden;transition:max-height .3s ease}
+.timer-settings-wrap.collapsed{max-height:0}
+.timer-settings-wrap.expanded{max-height:200px}
+.tset-toggle{display:flex;align-items:center;gap:6px;padding:8px 18px;cursor:pointer;border:none;background:none;color:var(--dim);font-size:12px;font-weight:600;width:100%;text-align:left;border-top:1px solid var(--border)}
+.tset-toggle:hover{color:var(--text)}
+.tset-toggle-arrow{transition:transform .25s;display:inline-block}
+.tset-toggle-arrow.open{transform:rotate(90deg)}
+
+/* ── FULLSCREEN OVERLAY ─────────────────────────────────── */
+#fs-overlay{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:var(--bg);flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:32px 24px;
+}
+#fs-overlay.open{display:flex}
+.fs-topbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:14px 18px}
+.fs-topbar-title{font-size:13px;font-weight:700;color:var(--dim);letter-spacing:.5px}
+.fs-topbar-btns{display:flex;gap:8px}
+.fs-btn-minimize,.fs-btn-exit{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--dim)}
+.fs-btn-minimize:hover,.fs-btn-exit:hover{color:var(--text);background:var(--surface2)}
+.fs-phase{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;min-height:20px}
+.fs-phase.warmup{color:#4d9fff}.fs-phase.work{color:var(--accent)}.fs-phase.rest{color:var(--blue)}.fs-phase.finisher{color:var(--red)}.fs-phase.getready{color:var(--orange)}
+.fs-round{font-size:14px;color:var(--dim);margin-bottom:16px;min-height:20px}
+.fs-countdown{font-size:clamp(80px,20vw,160px);font-weight:900;font-variant-numeric:tabular-nums;line-height:1;letter-spacing:-4px}
+.fs-countdown.warmup{color:#4d9fff}.fs-countdown.work{color:var(--accent)}.fs-countdown.rest{color:var(--blue)}.fs-countdown.getready{color:var(--orange)}.fs-countdown.done-clr{color:var(--green)}
+.fs-exercise{font-size:clamp(16px,3vw,24px);font-weight:600;margin-top:20px;max-width:700px;line-height:1.4;color:var(--text)}
+.fs-progress-wrap{width:min(500px,80vw);height:6px;background:var(--surface2);border-radius:3px;margin-top:32px;overflow:hidden}
+.fs-progress-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .5s linear}
+.fs-controls{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap;justify-content:center}
+.fs-btn-pause{padding:14px 36px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;border:none;background:var(--orange);color:#000}
+.fs-btn-skip{padding:12px 22px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--dim)}
+.fs-btn-skip:hover{color:var(--text)}
+.fs-stations{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap;justify-content:center}
+.fs-st{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--border);color:var(--dim)}
+.fs-st.fs-current{background:rgba(232,240,72,.1);border-color:var(--accent);color:var(--accent)}
+/* ── MINIMIZED TIMER BAR ─────────────────────────────────── */
+#timer-bar{
+  display:none;position:fixed;bottom:0;left:0;right:0;z-index:400;
+  background:var(--surface);border-top:2px solid var(--accent);
+  padding:10px 20px;cursor:pointer;
+  flex-direction:row;align-items:center;justify-content:space-between;gap:12px;
+}
+#timer-bar.show{display:flex}
+#timer-bar:hover{background:var(--surface2)}
+.tbar-left{display:flex;align-items:center;gap:12px}
+.tbar-phase{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent)}
+.tbar-countdown{font-size:22px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--text)}
+.tbar-exercise{font-size:13px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+.tbar-expand{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:var(--accent);color:#000}
+
+/* Bottom panels */
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+@media(max-width:600px){.bottom-row{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.panel-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.panel-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.panel-body{padding:14px 16px}.panel-body.hidden{display:none}
+.chev{color:var(--dim);font-size:12px}
+.ach-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.ach-item{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;background:var(--surface2);opacity:.35}
+.ach-item.earned{background:rgba(232,240,72,.07);border:1px solid rgba(232,240,72,.18);opacity:1}
+.ach-icon{font-size:18px;min-width:26px;text-align:center}
+.ach-name{font-size:11px;font-weight:700}.ach-req{font-size:10px;color:var(--dim)}
+.scroll-area{max-height:280px;overflow-y:auto;padding-right:4px}
+.scroll-area::-webkit-scrollbar{width:4px}.scroll-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.hist-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border-radius:8px;font-size:12px;margin-bottom:6px}
+.hist-week{font-weight:700;color:var(--accent);min-width:58px}
+.hist-day-pill{padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(232,240,72,.1);color:var(--accent)}
+.hist-rpe{color:var(--dim);font-size:11px;margin-left:auto}
+
+/* Settings */
+.settings-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:18px;display:none}
+.settings-panel.open{display:block}
+.video-slots{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+@media(max-width:500px){.video-slots{grid-template-columns:1fr}}
+.video-slot{background:var(--surface2);border-radius:8px;padding:12px}
+.slot-lbl{font-size:11px;color:var(--dim);margin-bottom:6px}
+
+/* Buttons */
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:var(--accent);color:#000}.btn-primary:hover{background:var(--accent-dim)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--border)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-danger{background:rgba(255,77,77,.12);color:var(--red);border:1px solid rgba(255,77,77,.3)}.btn-danger:hover{background:rgba(255,77,77,.22)}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal-backdrop{position:absolute;inset:0;z-index:0;cursor:pointer}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:420px;position:relative;z-index:1;overflow:hidden}
+.modal-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:15px;font-weight:700}
+.modal-body{padding:20px}.modal-footer{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.fg{margin-bottom:16px}
+.flbl{font-size:12px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
+.finput{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:14px;outline:none;transition:border-color .15s;font-family:inherit}
+.finput:focus{border-color:var(--accent)}
+.rpe-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.rpe-btn{aspect-ratio:1;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--dim);font-size:12px;font-weight:700;cursor:pointer;transition:all .12s}
+.rpe-btn:hover{border-color:var(--accent);color:var(--accent)}.rpe-btn.sel{background:var(--accent);color:#000;border-color:var(--accent)}
+.rpe-hint{font-size:12px;color:var(--dim);margin-top:6px;min-height:18px}
+
+/* Toast */
+.toasts{position:fixed;bottom:24px;right:24px;z-index:600;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:slideIn .3s ease}
+.toast-icon{font-size:20px}.toast-txt{font-size:13px;font-weight:600}.toast-sub{font-size:11px;color:var(--dim);margin-top:2px}
+@keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+.dim-txt{font-size:12px;color:var(--dim)}
+a{color:var(--accent)}
+code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:3px}
+.flex-gap{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+</style>
+</head>
+<body>
+
+<!-- ── FULLSCREEN TIMER OVERLAY ────────────────────────────────────── -->
+<div id="fs-overlay">
+  <div class="fs-topbar">
+    <span class="fs-topbar-title">🥊 Boxing Timer</span>
+    <div class="fs-topbar-btns">
+      <button class="fs-btn-minimize" onclick="minimizeTimer()">⊟ Minimize</button>
+      <button class="fs-btn-exit" onclick="exitTimer()">✕ End</button>
+    </div>
+  </div>
+  <div class="fs-phase" id="fs-phase">Ready</div>
+  <div class="fs-round" id="fs-round"></div>
+  <div class="fs-countdown" id="fs-countdown">00:00</div>
+  <div class="fs-exercise" id="fs-exercise">Press Start to begin</div>
+  <div class="fs-progress-wrap"><div class="fs-progress-fill" id="fs-progress" style="width:0%"></div></div>
+  <div class="fs-stations" id="fs-stations"></div>
+  <div class="fs-controls">
+    <button class="fs-btn-pause" id="fs-btn-pause" onclick="toggleBoxingTimer()">⏸ Pause</button>
+    <button class="fs-btn-skip" onclick="skipPhase()">Skip ›</button>
+  </div>
+</div>
+
+<!-- ── MINIMIZED TIMER BAR ──────────────────────────────────────────── -->
+<div id="timer-bar" onclick="maximizeTimer()">
+  <div class="tbar-left">
+    <span class="tbar-phase" id="tbar-phase">—</span>
+    <span class="tbar-countdown" id="tbar-countdown">—</span>
+    <span class="tbar-exercise" id="tbar-exercise"></span>
+  </div>
+  <button class="tbar-expand" onclick="maximizeTimer();event.stopPropagation()">⊞ Open Timer</button>
+</div>
+
+<!-- ── MAIN APP ────────────────────────────────────────────────────── -->
+<div class="app" id="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <div class="logo">C<span>-</span>Workout</div>
+      <div class="dim-txt">Boxing + Cycling · 52-Week Program</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-val" id="h-streak">0🔥</div><div class="stat-lbl">Streak</div></div>
+      <div class="stat"><div class="stat-val" id="h-total">0</div><div class="stat-lbl">Workouts</div></div>
+      <div class="stat"><div class="stat-val" id="h-badges">0/20</div><div class="stat-lbl">Badges</div></div>
+      <button class="btn btn-secondary btn-sm" onclick="toggleSettings()">⚙️ Settings</button>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="settings-panel" id="settings-panel">
+    <div style="font-size:14px;font-weight:700;margin-bottom:8px">⚙️ Settings</div>
+    <div class="flex-gap" style="margin-top:4px">
+      <button class="btn btn-secondary btn-sm" onclick="toggleSettings()">Close</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmReset()">🗑️ Reset All Data</button>
+    </div>
+  </div>
+
+  <!-- Week nav -->
+  <div class="week-nav">
+    <button class="btn-icon" id="btn-prev" onclick="changeWeek(-1)">‹</button>
+    <div class="week-info">
+      <div class="week-title" id="week-title">Week 1</div>
+      <div class="week-phase" id="week-phase"></div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:2%"></div></div>
+      <div class="prog-lbl" id="prog-lbl">0/3 days complete</div>
+    </div>
+    <button class="btn-icon" id="btn-next" onclick="changeWeek(1)">›</button>
+  </div>
+
+  <!-- Day selector -->
+  <div class="day-tabs" id="day-tabs"></div>
+
+  <!-- Workout panel -->
+  <div class="workout-panel">
+    <div class="workout-tabs">
+      <button class="wtab active" id="wtab-cycling" onclick="switchWorkoutTab('cycling')">🚴 Cycling</button>
+      <button class="wtab" id="wtab-boxing" onclick="switchWorkoutTab('boxing')">🥊 Boxing</button>
+      <button class="wtab" id="wtab-progress" onclick="switchWorkoutTab('progress')">🏆 Progress</button>
+    </div>
+
+    <!-- CYCLING TAB -->
+    <div class="tab-content active" id="tab-cycling">
+      <div id="video-container"></div>
+      <div class="log-section">
+        <div>
+          <div class="log-status" id="cycling-status">Not logged yet</div>
+          <div class="log-detail" id="cycling-detail"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-log-cycling" onclick="openModal()">+ Log Workout</button>
+      </div>
+    </div>
+
+    <!-- BOXING TAB -->
+    <div class="tab-content" id="tab-boxing">
+      <div class="boxing-header">
+        <div class="boxing-title-main" id="boxing-title">—</div>
+        <div class="boxing-subtitle" id="boxing-subtitle"></div>
+      </div>
+      <div class="stations" id="stations-list"></div>
+
+      <!-- Guided Timer -->
+      <div class="timer-section">
+        <div class="timer-main">
+          <div class="timer-phase" id="t-phase">Ready to start</div>
+          <div class="timer-round" id="t-round"></div>
+          <div class="timer-countdown" id="t-countdown">10:00</div>
+          <div class="timer-exercise" id="t-exercise">Press Start — timer goes full screen</div>
+        </div>
+        <div class="timer-progress"><div class="timer-progress-fill" id="t-progress" style="width:0%"></div></div>
+        <div class="timer-controls">
+          <button class="btn-treset" onclick="resetBoxingTimer()">↺ Reset</button>
+          <button class="btn-tstart" id="btn-startstop" onclick="toggleBoxingTimer()">▶ Start</button>
+          <button class="btn-tskip" onclick="skipPhase()">Skip ›</button>
+        </div>
+        <button class="tset-toggle" onclick="toggleTimerSettings()">
+          <span class="tset-toggle-arrow" id="tset-arrow">›</span> Round Settings
+        </button>
+        <div class="timer-settings-wrap collapsed" id="tset-wrap">
+          <div class="timer-settings">
+            <span style="font-weight:600;color:var(--text)">Rounds:</span>
+            <div class="tset-item"><input class="tset-input" type="number" id="tset-work" value="2" min="1" max="10"/> min work</div>
+            <div class="tset-item"><input class="tset-input" type="number" id="tset-rest" value="45" min="0" max="300"/> sec rest</div>
+            <div class="tset-item"><input class="tset-input" type="number" id="tset-rounds" value="3" min="1" max="6"/> rounds/station</div>
+            <span class="tset-sep">|</span>
+            <span style="font-weight:600;color:var(--text)">Finisher:</span>
+            <div class="tset-item"><input class="tset-input" type="number" id="tset-fwork" value="30" min="10" max="120"/> sec work</div>
+            <div class="tset-item"><input class="tset-input" type="number" id="tset-frest" value="10" min="0" max="60"/> sec rest</div>
+            <div class="tset-item"><input class="tset-input" type="number" id="tset-frounds" value="3" min="1" max="6"/> rounds</div>
+            <button class="btn btn-secondary btn-sm" onclick="applyTimerSettings()" style="margin-left:4px">Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRESS TAB -->
+    <div class="tab-content" id="tab-progress">
+      <div class="bottom-row">
+        <div class="panel">
+          <div class="panel-hdr" onclick="togglePanel('ach')">
+            <div class="panel-title">🏆 Achievements <span id="ach-count" style="font-size:11px;font-weight:400;color:var(--dim)">0/20</span></div>
+            <span class="chev" id="ach-chev">▼</span>
+          </div>
+          <div class="panel-body" id="ach-body">
+            <div class="scroll-area"><div class="ach-grid" id="ach-grid"></div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr" onclick="togglePanel('hist')">
+            <div class="panel-title">📋 History</div>
+            <span class="chev" id="hist-chev">▼</span>
+          </div>
+          <div class="panel-body" id="hist-body">
+            <div class="scroll-area" id="hist-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /app -->
+
+<!-- Log Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-backdrop" onclick="closeModal()"></div>
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modal-title">Log Workout</div>
+      <button class="btn-icon" onclick="closeModal()" style="width:30px;height:30px;font-size:14px">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <label class="flbl">Rate of Perceived Exertion (RPE)</label>
+        <div class="rpe-grid" id="rpe-grid"></div>
+        <div class="rpe-hint" id="rpe-hint">Select RPE</div>
+      </div>
+      <div class="fg">
+        <label class="flbl">Avg Heart Rate (bpm)</label>
+        <input class="finput" type="number" id="inp-hr" placeholder="e.g. 145" min="50" max="220"/>
+      </div>
+      <div class="fg" style="margin-bottom:0">
+        <label class="flbl">Notes</label>
+        <textarea class="finput" id="inp-notes" rows="3" placeholder="How did it feel?" style="resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveLog()">Save Log</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+// ── Boxing Data ───────────────────────────────────────────────────────────────
+const BOXING = [
+  {id:1,title:"The Sprawl Flow",station1:"1-2-3 + 1 Sprawl (Burpee) — Loop",station2:"Double Jab-Cross + 2 Slip-Squats — Loop",station3:"Freestyle Flow: Punch-Move-Punch",finisher:"Straight Punches + High Knees"},
+  {id:2,title:"Rhythm & Roll",station1:"1-2-Roll + 2 Mountain Climbers — Loop",station2:"3-4-3 (Hooks) + 1 Pushup — Loop",station3:"Heavy Bag: Focus on 1-2-Step-1-2",finisher:"Power Hooks (Non-stop)"},
+  {id:3,title:"Counter Flow",station1:"Slip-2-3 + 1 Sprawl — Loop",station2:"Jab-Slip-Jab + 2 Jumping Jacks — Loop",station3:"Shadowboxing: Slip-Punch-Slip-Move",finisher:"Speed Uppercuts"},
+  {id:4,title:"Body-Head-Reset",station1:"Jab-Body Cross + 2 Squat-Steps — Loop",station2:"Body Hook-Head Hook + 1 Sprawl — Loop",station3:"Heavy Bag: Alternate Body and Head",finisher:"Non-stop Body Rips"},
+  {id:5,title:"Pivot & Power",station1:"1-2-Pivot + 2 Mountain Climbers — Loop",station2:"1-2-3-2-Step Out + 1 Pushup — Loop",station3:"Shadowboxing: Focus on Angle Changes",finisher:"Fast Feet + Straights"},
+  {id:6,title:"Uppercut Rhythm",station1:"5-6-3-2 + 1 Sprawl — Loop",station2:"1-2-5 + 2 Slip-Squats — Loop",station3:"Heavy Bag: Inside Fighting Flow",finisher:"Rapid Fire Uppercuts"},
+  {id:7,title:"Rolling Thunder",station1:"1-2-Roll-2 + 2 Plank Jacks — Loop",station2:"Cross-Hook-Roll-Hook + 1 Sprawl — Loop",station3:"Shadowboxing: Roll and Counter",finisher:"Roll-Hook-Roll-Hook"},
+  {id:8,title:"Triple Threat Flow",station1:"Triple Jab-Cross + 2 High Knees — Loop",station2:"1-2-3-4-5-6 + 1 Pushup — Loop",station3:"Heavy Bag: Non-stop Volume",finisher:"Non-stop 1-2s"},
+  {id:9,title:"Southpaw Switch",station1:"1-2-Switch-1-2 + 1 Sprawl — Loop",station2:"Lead Hook-Cross + 2 Slip-Squats — Loop",station3:"Shadowboxing: Lead Hand Dominance",finisher:"Power Crosses"},
+  {id:10,title:"Pressure Flow",station1:"1-2-3-Step Forward + 2 Mountain Climbers — Loop",station2:"Body Hook-Head Hook + 1 Sprawl — Loop",station3:"Heavy Bag: Walk the Bag Back",finisher:"All Out Power"},
+  {id:11,title:"Distance Control",station1:"Jab-Step Back-2 + 2 Jumping Jacks — Loop",station2:"1-2-1-2 (Backpedal) + 1 Sprawl — Loop",station3:"Shadowboxing: Long Range Flow",finisher:"Speed Straights"},
+  {id:12,title:"The Counter-Step",station1:"Slip-2-3 + 1 Pushup — Loop",station2:"Roll-3-2 + 2 Squat-Steps — Loop",station3:"Heavy Bag: Catch and Shoot",finisher:"Slip-Slip-Counter"},
+  {id:13,title:"Volume Machine",station1:"1-2-1-2-1-2 + 1 Sprawl — Loop",station2:"Jab-Cross-Hook-Uppercut + 2 Plank Jacks — Loop",station3:"Shadowboxing: Continuous Speed",finisher:"Non-stop 1-2-3-4"},
+  {id:14,title:"The Inside Sprawl",station1:"3-4-3-4 + 1 Sprawl — Loop",station2:"5-6-5-6 + 1 Pushup — Loop",station3:"Heavy Bag: Dig to the Body",finisher:"Power Hooks (Inside)"},
+  {id:15,title:"The Sharp Flow",station1:"1-2-Body-Head + 2 Mountain Climbers — Loop",station2:"1-2-Slip-2-Roll + 1 Sprawl — Loop",station3:"Shadowboxing: Accuracy & Reset",finisher:"Power Straight 1-2s"},
+  {id:16,title:"Leg Burner Flow",station1:"1-2-Squat + 1 Sprawl — Loop",station2:"3-4-Lunge + 1 Sprawl — Loop",station3:"Heavy Bag: Sit on the Punches",finisher:"Speed Punches + High Knees"},
+  {id:17,title:"Anchor Flow",station1:"Double Jab-Cross-Hook + 1 Pushup — Loop",station2:"Rear Hook-Lead Hook + 2 Mountain Climbers — Loop",station3:"Shadowboxing: Grounded Power",finisher:"Hook Burnout"},
+  {id:18,title:"Evasive Flow",station1:"Slip-Slip-Roll-Roll + 1 Sprawl — Loop",station2:"Jab-Roll-Cross + 2 Plank Jacks — Loop",station3:"Heavy Bag: Move After Every Combo",finisher:"Slip-Roll-Slip-Roll"},
+  {id:19,title:"Pre-Finisher Flow",station1:"1-2-3-4-5-6 + 1 Sprawl — Loop",station2:"Jab-Jab-Cross-Hook + 1 Pushup — Loop",station3:"Shadowboxing: Max Volume Flow",finisher:"Max Volume Straights"},
+  {id:20,title:"The Heavy Sprawl",station1:"Double Cross + 1 Sprawl — Loop",station2:"Lead Hook-Uppercut + 2 Squat-Steps — Loop",station3:"Heavy Bag: 100% Power Flow",finisher:"All Out Hooks"},
+  {id:21,title:"Speed Burst Flow",station1:"1-2-1-2 Fast + 2 High Knees — Loop",station2:"Jab-Jab-2 + 1 Sprawl — Loop",station3:"Shadowboxing: Hands Up, Feet Fast",finisher:"Hand Speed Burnout"},
+  {id:22,title:"The Grind Loop",station1:"Hook-Hook-Uppercut + 1 Pushup — Loop",station2:"1-2-3-Roll-3 + 1 Sprawl — Loop",station3:"Heavy Bag: Relentless Pressure",finisher:"Continuous Uppercuts"},
+  {id:23,title:"Angle Hunter Flow",station1:"Jab-Step Left-2 + 2 Plank Jacks — Loop",station2:"1-2-Step Right-Hook + 1 Sprawl — Loop",station3:"Shadowboxing: Cut the Corners",finisher:"Fast Footwork + Punches"},
+  {id:24,title:"The Core Loop",station1:"1-2 + 2 Sit-up Punches — Loop",station2:"3-4 + 2 Plank Taps — Loop",station3:"Heavy Bag: Tight Core, Fast Hands",finisher:"Non-stop 1-2s"},
+  {id:25,title:"Defensive Flow",station1:"Jab-Cross-Block + 1 Sprawl — Loop",station2:"Hook-Hook-Cover + 1 Pushup — Loop",station3:"Shadowboxing: Defense into Offense",finisher:"High Volume Straights"},
+  {id:26,title:"Double Flow",station1:"Double Jab-Double Cross + 1 Sprawl — Loop",station2:"Double Hook-Double Uppercut + 1 Pushup — Loop",station3:"Heavy Bag: Double Up Everything",finisher:"Double 1-2s"},
+  {id:27,title:"Assassin Flow",station1:"Body Jab-Head Cross-Hook + 1 Sprawl — Loop",station2:"Slip-2-Roll-3 + 1 Pushup — Loop",station3:"Shadowboxing: Precision over Speed",finisher:"Power 2-3s"},
+  {id:28,title:"Bolt Flow",station1:"1-2-1-2-3 + 2 High Knees — Loop",station2:"5-6-5-6-1-2 + 1 Sprawl — Loop",station3:"Heavy Bag: Rapid Fire Explosions",finisher:"Fast 1-2s"},
+  {id:29,title:"Iron Flow",station1:"1-2-3-2-Roll + 1 Sprawl — Loop",station2:"5-4-5-4 + 1 Pushup — Loop",station3:"Shadowboxing: Toughness & Tempo",finisher:"Power Hooks"},
+  {id:30,title:"Endurance Loop",station1:"1-2-3-4-5-6-7-8 + 1 Sprawl — Loop",station2:"Continuous 1-2 + 1 Pushup — Loop",station3:"Heavy Bag: Deep Water Flow",finisher:"Non-stop Volume"},
+  {id:31,title:"Hunter Flow",station1:"Jab-Jab-Pivot-2 + 1 Sprawl — Loop",station2:"Hook-Roll-Hook + 1 Pushup — Loop",station3:"Shadowboxing: Stalk the Opponent",finisher:"Speed Hooks"},
+  {id:32,title:"Hammer Flow",station1:"2-3-2 + 1 Sprawl — Loop",station2:"Jab-Body Hook-Cross + 1 Pushup — Loop",station3:"Heavy Bag: Thudding Power",finisher:"Max Power Straights"},
+  {id:33,title:"Flicker Flow",station1:"Flicker Jab-Jab-2 + 2 Jumping Jacks — Loop",station2:"1-2-Slip-2 + 1 Sprawl — Loop",station3:"Shadowboxing: Loose and Fast",finisher:"Fast Jabs Only"},
+  {id:34,title:"Blender Flow",station1:"Hook-Uppercut-Hook + 1 Sprawl — Loop",station2:"1-2-3-4-Roll + 1 Pushup — Loop",station3:"Heavy Bag: Mix Up the Levels",finisher:"Mixed Punches"},
+  {id:35,title:"Weave Flow",station1:"Roll-Roll-Hook + 1 Sprawl — Loop",station2:"1-2-Roll-3 + 1 Pushup — Loop",station3:"Shadowboxing: Head Always Moving",finisher:"Roll-Punch Flow"},
+  {id:36,title:"Snatcher Flow",station1:"Jab-Body-Hook + 1 Sprawl — Loop",station2:"Body-Body-Head + 1 Pushup — Loop",station3:"Heavy Bag: Target the Ribs",finisher:"Power Body Shots"},
+  {id:37,title:"Specialist Flow",station1:"Uppercut-Hook-Cross + 1 Sprawl — Loop",station2:"Jab-Jab-Uppercut + 1 Pushup — Loop",station3:"Shadowboxing: Focus on the 5",finisher:"Uppercut Burnout"},
+  {id:38,title:"Exit Flow",station1:"1-2-3-Step Back + 1 Sprawl — Loop",station2:"Jab-Cross-Pivot + 1 Pushup — Loop",station3:"Heavy Bag: Hit and Get Out",finisher:"Speed 1-2s + Feet"},
+  {id:39,title:"Overhand Flow",station1:"Jab-Overhand-Hook + 1 Sprawl — Loop",station2:"1-2-Slip-Overhand + 1 Pushup — Loop",station3:"Shadowboxing: Arc the Punches",finisher:"Power Overhands"},
+  {id:40,title:"Infinite Flow",station1:"10s Speed 1-2 + 1 Sprawl — Loop",station2:"10s Speed 3-4 + 1 Pushup — Loop",station3:"Heavy Bag: Pure Conditioning",finisher:"Max Volume Burnout"},
+  {id:41,title:"Counter-Hook Flow",station1:"Roll-Hook-Cross + 1 Sprawl — Loop",station2:"Slip-Hook-2 + 1 Pushup — Loop",station3:"Shadowboxing: Catch and Return",finisher:"Fast Hooks"},
+  {id:42,title:"Levels Flow",station1:"Jab-Body-Head + 1 Sprawl — Loop",station2:"Body-Head-Body + 1 Pushup — Loop",station3:"Heavy Bag: Up and Down",finisher:"Body-Head Non-stop"},
+  {id:43,title:"Ghost Flow",station1:"Jab-Step-Jab + 2 Jumping Jacks — Loop",station2:"1-2-Roll-Pivot + 1 Sprawl — Loop",station3:"Shadowboxing: Hard to Hit",finisher:"Footwork + 1-2s"},
+  {id:44,title:"Steamroller Flow",station1:"1-2-3-4-Forward + 1 Sprawl — Loop",station2:"Jab-Cross-Hook-Cross + 1 Pushup — Loop",station3:"Heavy Bag: Constant Pressure",finisher:"Power Straights"},
+  {id:45,title:"Surgeon Flow",station1:"Jab-Body Jab-Uppercut + 1 Sprawl — Loop",station2:"Cross-Hook-Body Cross + 1 Pushup — Loop",station3:"Shadowboxing: Technical Accuracy",finisher:"Speed Uppercuts"},
+  {id:46,title:"Brawler Flow",station1:"Hook-Uppercut-Hook + 1 Sprawl — Loop",station2:"1-2-Hook-Hook + 1 Pushup — Loop",station3:"Heavy Bag: Dog Fight Flow",finisher:"Inside Power"},
+  {id:47,title:"Switch Flow",station1:"1-2-Switch-1-2 + 1 Sprawl — Loop",station2:"Hook-Switch-Hook + 1 Pushup — Loop",station3:"Shadowboxing: Bilateral Balance",finisher:"Fast Switching 1-2s"},
+  {id:48,title:"Final Prep Flow",station1:"1-2-3-4-Slip-Slip + 1 Sprawl — Loop",station2:"Jab-Cross-Roll-Roll + 1 Pushup — Loop",station3:"Heavy Bag: Ready for War",finisher:"Max Volume"},
+  {id:49,title:"Iron Man Flow",station1:"Continuous 1-2-3 + 1 Sprawl — Loop",station2:"Continuous 2-3-2 + 1 Pushup — Loop",station3:"Heavy Bag: Don't Stop Punching",finisher:"High Knees + Straights"},
+  {id:50,title:"The Last Flow",station1:"Freestyle Shadow + 1 Sprawl — Loop",station2:"Freestyle Heavy Bag + 1 Pushup — Loop",station3:"Freestyle Max Effort",finisher:"Total Empty Tank"},
+];
+
+const ACH_DEFS=[
+  {id:"consistency_3",title:"Hat Trick",icon:"🎩",requirement:"Complete 3 weeks in a row"},
+  {id:"consistency_12",title:"Quarter Century",icon:"📅",requirement:"Complete 12 weeks in a row"},
+  {id:"dawn_patrol",title:"Dawn Patrol",icon:"🌅",requirement:"Log before 6:00 AM"},
+  {id:"night_owl",title:"Night Owl",icon:"🦉",requirement:"Log after 8:00 PM"},
+  {id:"weekend_warrior",title:"Weekend Warrior",icon:"⚔️",requirement:"Log on a weekend"},
+  {id:"perfect_month",title:"Perfect Month",icon:"🗓️",requirement:"4+ full weeks in a month"},
+  {id:"max_effort",title:"Beast Mode",icon:"🦁",requirement:"Log RPE of 10"},
+  {id:"smooth_operator",title:"Smooth Operator",icon:"😎",requirement:"Log RPE of 4 or below"},
+  {id:"heart_rate_champ",title:"Zone Runner",icon:"❤️",requirement:"Avg HR over 150 bpm"},
+  {id:"heavy_pedals",title:"Diesel Engine",icon:"⚙️",requirement:"Log RPE 8+"},
+  {id:"century_club",title:"Century Rider",icon:"💯",requirement:"Complete 100 workouts"},
+  {id:"halfway_there",title:"Summit View",icon:"🏔️",requirement:"Complete all of Week 26"},
+  {id:"finish_line",title:"Yellow Jersey",icon:"🏆",requirement:"Complete all of Week 52"},
+  {id:"streak_5",title:"High Five",icon:"🖐️",requirement:"5-week perfect streak"},
+  {id:"warmup_king",title:"Prepped & Primed",icon:"🔥",requirement:"Complete boxing timer 5 times"},
+  {id:"cooldown_king",title:"Recovery Master",icon:"❄️",requirement:"Complete boxing timer 10 times"},
+  {id:"full_rotation",title:"Video Jockey",icon:"🎬",requirement:"Workouts across 6 weeks"},
+  {id:"comeback_kid",title:"Comeback Kid",icon:"💪",requirement:"Log after skipping a week"},
+  {id:"data_nerd",title:"Data Analyst",icon:"📊",requirement:"Notes on 10 workouts"},
+  {id:"adaptation",title:"Chameleon",icon:"🦎",requirement:"Complete all of Week 14"},
+];
+
+const DAYS=['day1','day2','day3'];
+const DAY_LABELS={day1:'Day 1',day2:'Day 2',day3:'Day 3'};
+const RPE_LABELS=['','Very Easy','Easy','Moderate','Somewhat Hard','Hard','Hard','Very Hard','Very Hard','Extremely Hard','Max Effort! 🔥'];
+const K={hist:'cw-history',ach:'cw-ach',timers:'cw-timers',week:'cw-week'};
+const WORKOUT_DATA={
+  phases:[
+    {range:[1,13],name:"Foundation",focus:"Building aerobic base and pedal stroke efficiency."},
+    {range:[14,26],name:"Power Up",focus:"Increasing sustained power and climbing endurance."},
+    {range:[27,39],name:"Shred",focus:"Maximum caloric burn with high-intensity intervals."},
+    {range:[40,52],name:"Peak Performance",focus:"Combining speed and strength for maximum fitness."}
+  ],
+  video_library:{
+    "Day 1":[
+      {id:"ewrf_rCHUdA",title:"15 Min HIIT Booster",duration:"15m"},
+      {id:"wBurKQX7h4Q",title:"20 Min Fat Burn",duration:"20m"},
+      {id:"QuKEyPhRrMM",title:"25 Min HIIT Intervals",duration:"25m"},
+      {id:"TO1h5fbOLAA",title:"Quick HIIT Sprints",duration:"20m"},
+      {id:"MM4YwZvmdhs",title:"Sharp & Hard Efforts",duration:"20m"},
+      {id:"lwuFoUHxHJ0",title:"Feel the Burn HIIT",duration:"20m"}
+    ],
+    "Day 2":[
+      {id:"FtkPs2tFx9I",title:"40 Min Passo Pordoi",duration:"40m"},
+      {id:"DdRZyRoONuE",title:"45 Min Rolling Hills",duration:"45m"},
+      {id:"J9fAk04oTtA",title:"45 Min VO2 Max",duration:"45m"},
+      {id:"V-HmspieYjE",title:"Sweet Spot Endurance",duration:"30m"},
+      {id:"jY8MwfuyK94",title:"Cadence & Speed Drills",duration:"60m"},
+      {id:"QB69Pwl6GI8",title:"Endurance Threshold",duration:"60m"}
+    ],
+    "Day 3":[
+      {id:"vDKnTjpccf4",title:"30 Min Hill Climb",duration:"30m"},
+      {id:"MvO2LRlVsyI",title:"30 Min Low Cadence",duration:"30m"},
+      {id:"ZiGE3-L4vyg",title:"30 Min Power Intervals",duration:"30m"},
+      {id:"ww8rVspvaLw",title:"High Cadence HIIT",duration:"30m"},
+      {id:"ug_1R9oiNvo",title:"On & Off Varied Intensity",duration:"30m"},
+      {id:"vyWJ6PCsjGI",title:"Into the Unknown Mystery Ride",duration:"30m"}
+    ]
+  }
+};
+
+let S={
+  week:1,activeDay:'day1',activeWorkoutTab:'cycling',
+  history:{},achievements:[],timerUses:{done:0},
+  panels:{ach:true,hist:true},modalRpe:0,
+};
+
+// Boxing timer
+let BT={
+  phases:[],phaseIdx:0,secsLeft:0,totalSecs:0,running:false,iv:null,completedCount:0,
+  // Defaults
+  workSecs:120,restSecs:45,rounds:3,
+  fWorkSecs:30,fRestSecs:10,fRounds:3,
+  warmupSecs:600,warmupRestSecs:60,
+};
+
+// ── Load/Save ─────────────────────────────────────────────────────────────────
+function loadState(){
+  try{S.week=Math.max(1,Math.min(52,parseInt(localStorage.getItem(K.week)||'1')||1));}catch{}
+  try{S.history=JSON.parse(localStorage.getItem(K.hist)||'{}');}catch{}
+  try{S.timerUses=JSON.parse(localStorage.getItem(K.timers)||'{"done":0}');}catch{}
+  try{
+    const saved=JSON.parse(localStorage.getItem(K.ach)||'[]');
+    S.achievements=ACH_DEFS.map(d=>{const f=saved.find(a=>a.id===d.id);return{...d,earned:f?.earned||false,earnedAt:f?.earnedAt||null};});
+  }catch{S.achievements=ACH_DEFS.map(d=>({...d,earned:false,earnedAt:null}));}
+}
+function saveState(){
+  try{
+    localStorage.setItem(K.hist,JSON.stringify(S.history));
+    localStorage.setItem(K.ach,JSON.stringify(S.achievements));
+    localStorage.setItem(K.timers,JSON.stringify(S.timerUses));
+    localStorage.setItem(K.week,String(S.week));
+  }catch{}
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function isDayDone(w,d){return!!(S.history[w]?.days?.[d]);}
+function isWeekDone(w){const h=S.history[w];return!!(h?.days?.day1&&h?.days?.day2&&h?.days?.day3);}
+function completedDays(w){return Object.keys(S.history[w]?.days||{}).length;}
+function getStreak(){
+  const full=Object.keys(S.history).map(Number).filter(w=>isWeekDone(w)).sort((a,b)=>b-a);
+  if(!full.length)return 0;let s=0,e=full[0];for(const w of full){if(w===e){s++;e--;}else break;}return s;
+}
+function getTotalWorkouts(){return Object.values(S.history).flatMap(wl=>Object.values(wl.days||{})).length;}
+function getBoxing(week,day){
+  const off={day1:0,day2:17,day3:34}[day]||0;
+  return BOXING[((week-1+off)%BOXING.length+BOXING.length)%BOXING.length];
+}
+function getVideo(week,day){
+  const dayKey={day1:'Day 1',day2:'Day 2',day3:'Day 3'}[day]||'Day 1';
+  const lib=WORKOUT_DATA.video_library[dayKey];
+  return lib[(week-1)%lib.length]||lib[0];
+}
+function getPhase(week){
+  return WORKOUT_DATA.phases.find(p=>week>=p.range[0]&&week<=p.range[1])||WORKOUT_DATA.phases[0];
+}
+function weekPhase(w){
+  const p=getPhase(w);
+  return `— ${p.name}`;
+}
+function fmt(secs){return Math.floor(secs/60).toString().padStart(2,'0')+':+'+(secs%60).toString().padStart(2,'0');}
+// Fix format - no + sign
+function fmtTime(secs){const m=Math.floor(secs/60),s=secs%60;return m.toString().padStart(2,'0')+':'+s.toString().padStart(2,'0');}
+
+// ── Boxing Bell (3 dings) ─────────────────────────────────────────────────────
+function bell(dings=3){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    for(let i=0;i<dings;i++){
+      const t=ctx.currentTime+i*0.55;
+      // Primary tone (bell body)
+      const o1=ctx.createOscillator();const g1=ctx.createGain();
+      o1.connect(g1);g1.connect(ctx.destination);
+      o1.type='sine';o1.frequency.setValueAtTime(987,t);
+      g1.gain.setValueAtTime(0,t);g1.gain.linearRampToValueAtTime(0.7,t+0.005);
+      g1.gain.exponentialRampToValueAtTime(0.001,t+0.9);
+      o1.start(t);o1.stop(t+0.9);
+      // Harmonic overtone
+      const o2=ctx.createOscillator();const g2=ctx.createGain();
+      o2.connect(g2);g2.connect(ctx.destination);
+      o2.type='sine';o2.frequency.setValueAtTime(1480,t);
+      g2.gain.setValueAtTime(0,t);g2.gain.linearRampToValueAtTime(0.35,t+0.005);
+      g2.gain.exponentialRampToValueAtTime(0.001,t+0.6);
+      o2.start(t);o2.stop(t+0.6);
+    }
+  }catch(e){}
+}
+
+// ── Build Timer Phases ────────────────────────────────────────────────────────
+function buildTimerPhases(bx){
+  const {workSecs:w,restSecs:r,rounds,fWorkSecs:fw,fRestSecs:fr,fRounds,warmupSecs,warmupRestSecs}=BT;
+  const phases=[];
+
+  // 1. Warmup
+  phases.push({label:'Warm Up',type:'warmup',stKey:'wu',exercise:'Light movement — loosen up, get your heart rate up, shadow box gently',secs:warmupSecs});
+
+  // 2. Warmup rest / get ready
+  phases.push({label:'Get Ready',type:'getready',stKey:'wu',exercise:'Grab water — rounds start in 1 minute. Gloves on, hands up!',secs:warmupRestSecs});
+
+  // 3. Stations
+  const sts=[
+    {key:'s1',label:'Station 1',text:bx.station1},
+    {key:'s2',label:'Station 2',text:bx.station2},
+    {key:'s3',label:'Station 3',text:bx.station3},
+  ];
+  sts.forEach((st,si)=>{
+    for(let rnd=1;rnd<=rounds;rnd++){
+      phases.push({label:`${st.label} — Round ${rnd}/${rounds}`,type:'work',stKey:st.key,exercise:st.text,secs:w});
+      // Rest after every round except the very last round of the last station
+      const isLastRoundOfLastStation=si===sts.length-1&&rnd===rounds;
+      if(r>0&&!isLastRoundOfLastStation){
+        const isBetweenStations=rnd===rounds;
+        phases.push({label:isBetweenStations?`Rest — Next: ${sts[si+1]?.label||'Finisher'}`:'Rest',type:'rest',stKey:st.key,exercise:isBetweenStations?`Coming up: ${sts[si+1]?.text||bx.finisher}`:'Breathe — stay loose, keep moving',secs:r});
+      }
+    }
+  });
+
+  // 4. Finisher rounds
+  for(let rnd=1;rnd<=fRounds;rnd++){
+    phases.push({label:`🔥 Finisher — Round ${rnd}/${fRounds}`,type:'finisher',stKey:'fin',exercise:bx.finisher,secs:fw});
+    if(fr>0&&rnd<fRounds)
+      phases.push({label:'Finisher Rest',type:'rest',stKey:'fin',exercise:'10 seconds — then back at it!',secs:fr});
+  }
+
+  return phases;
+}
+
+function applyTimerSettings(){
+  BT.workSecs  = Math.max(30,  parseInt(document.getElementById('tset-work').value||'2')*60);
+  BT.restSecs  = Math.max(0,   parseInt(document.getElementById('tset-rest').value||'45'));
+  BT.rounds    = Math.max(1,   parseInt(document.getElementById('tset-rounds').value||'3'));
+  BT.fWorkSecs = Math.max(10,  parseInt(document.getElementById('tset-fwork').value||'30'));
+  BT.fRestSecs = Math.max(0,   parseInt(document.getElementById('tset-frest').value||'10'));
+  BT.fRounds   = Math.max(1,   parseInt(document.getElementById('tset-frounds').value||'3'));
+  if(!BT.running)resetBoxingTimer();
+}
+
+function resetBoxingTimer(){
+  if(BT.iv){clearInterval(BT.iv);BT.iv=null;}
+  BT.running=false;BT.phaseIdx=0;
+  const bx=getBoxing(S.week,S.activeDay);
+  BT.phases=buildTimerPhases(bx);
+  BT.secsLeft=BT.phases[0].secs;BT.totalSecs=BT.phases[0].secs;
+  updateTimerUI();renderStations(bx);
+  document.getElementById('btn-startstop').textContent='▶ Start';
+  document.getElementById('btn-startstop').className='btn-tstart';
+}
+
+function toggleBoxingTimer(){
+  if(BT.phases.length===0)resetBoxingTimer();
+  if(BT.running){
+    // Pause
+    clearInterval(BT.iv);BT.iv=null;BT.running=false;
+    document.getElementById('btn-startstop').textContent='▶ Resume';
+    document.getElementById('btn-startstop').className='btn-tstart';
+    document.getElementById('fs-btn-pause').textContent='▶ Resume';
+    document.getElementById('fs-btn-pause').className='fs-btn-pause';
+  }else{
+    // Start / Resume
+    BT.running=true;
+    document.getElementById('btn-startstop').textContent='⏸ Pause';
+    document.getElementById('btn-startstop').className='btn-tpause';
+    document.getElementById('fs-btn-pause').textContent='⏸ Pause';
+    document.getElementById('fs-btn-pause').className='fs-btn-pause';
+    BT.iv=setInterval(timerTick,1000);
+    // Open timer overlay
+    openTimerOverlay();
+  }
+}
+
+function timerTick(){
+  BT.secsLeft--;
+  if(BT.secsLeft<=0){
+    bell(3);
+    BT.phaseIdx++;
+    if(BT.phaseIdx>=BT.phases.length){
+      // Done!
+      clearInterval(BT.iv);BT.iv=null;BT.running=false;
+      BT.secsLeft=0;BT.completedCount++;
+      S.timerUses.done=(S.timerUses.done||0)+1;
+      const unlocked=evaluateAchievements();saveState();
+      updateTimerUI(true);updateFsUI(true);
+      renderStations(getBoxing(S.week,S.activeDay),true);
+      document.getElementById('btn-startstop').textContent='▶ Start';
+      document.getElementById('btn-startstop').className='btn-tstart';
+      // Close overlay and mini bar when workout is complete
+      document.getElementById('fs-overlay').classList.remove('open');
+      document.getElementById('timer-bar').classList.remove('show');
+      showToast('🥊','Boxing complete!','Log your session when ready');
+      unlocked.forEach((a,i)=>setTimeout(()=>showToast(a.icon,'Achievement Unlocked!',a.title),(i+1)*700));
+      return;
+    }
+    BT.secsLeft=BT.phases[BT.phaseIdx].secs;BT.totalSecs=BT.secsLeft;
+    updateStationHighlight();
+  }
+  updateTimerUI();updateFsUI();updateTimerBar();
+}
+
+function skipPhase(){
+  if(BT.phaseIdx>=BT.phases.length-1)return;
+  bell(1);BT.phaseIdx++;BT.secsLeft=BT.phases[BT.phaseIdx].secs;BT.totalSecs=BT.secsLeft;
+  updateStationHighlight();updateTimerUI();updateFsUI();
+}
+
+// ── Timer UI ──────────────────────────────────────────────────────────────────
+function timerUIData(done=false){
+  const ph=BT.phases[BT.phaseIdx];
+  const pct=BT.totalSecs>0?(1-BT.secsLeft/BT.totalSecs)*100:0;
+  if(done) return{phase:'✅ Done!',phaseClass:'work',round:'Great work — log your session',cd:'00:00',cdClass:'done-clr',exercise:'Workout complete 💪',pct:100};
+  if(!ph)  return{phase:'Ready',phaseClass:'',round:'',cd:fmtTime(BT.secsLeft),cdClass:'',exercise:'Press Start to begin',pct:0};
+  const cdClass={warmup:'warmup',getready:'getready',work:'work',rest:'rest',finisher:'work'}[ph.type]||'';
+  const isWork=ph.type==='work'||ph.type==='finisher';
+  const round=isWork?'🥊 Push!':(ph.type==='warmup'?'10 min warm-up':(ph.type==='getready'?'⏳ Rounds start soon':ph.type==='rest'?'💨 Rest':''));
+  return{phase:ph.label,phaseClass:ph.type,round,cd:fmtTime(BT.secsLeft),cdClass,exercise:ph.exercise,pct};
+}
+
+function updateTimerUI(done=false){
+  const d=timerUIData(done);
+  document.getElementById('t-phase').textContent=d.phase;
+  document.getElementById('t-phase').className='timer-phase '+d.phaseClass;
+  document.getElementById('t-round').textContent=d.round;
+  document.getElementById('t-countdown').textContent=d.cd;
+  document.getElementById('t-countdown').className='timer-countdown '+d.cdClass;
+  document.getElementById('t-exercise').textContent=d.exercise;
+  document.getElementById('t-progress').style.width=d.pct+'%';
+}
+
+function updateFsUI(done=false){
+  const d=timerUIData(done);
+  document.getElementById('fs-phase').textContent=d.phase;
+  document.getElementById('fs-phase').className='fs-phase '+d.phaseClass;
+  document.getElementById('fs-round').textContent=d.round;
+  document.getElementById('fs-countdown').textContent=d.cd;
+  document.getElementById('fs-countdown').className='fs-countdown '+d.cdClass;
+  document.getElementById('fs-exercise').textContent=d.exercise;
+  document.getElementById('fs-progress').style.width=d.pct+'%';
+  updateFsStations();
+}
+
+function updateStationHighlight(){
+  const ph=BT.phases[BT.phaseIdx];if(!ph)return;
+  document.querySelectorAll('.station-card').forEach(el=>{
+    el.classList.remove('current');
+    if(el.dataset.key===ph.stKey)el.classList.add('current');
+  });
+  updateFsStations();
+}
+
+function updateFsStations(){
+  const ph=BT.phases[BT.phaseIdx];
+  document.querySelectorAll('.fs-st').forEach(el=>{
+    el.classList.toggle('fs-current',ph&&el.dataset.key===ph.stKey);
+  });
+}
+
+// ── Timer overlay controls ─────────────────────────────────────────────────────
+function openTimerOverlay(){
+  const overlay=document.getElementById('fs-overlay');
+  overlay.classList.add('open');
+  document.getElementById('timer-bar').classList.remove('show');
+  // Build fs stations on first open
+  if(!document.getElementById('fs-stations').children.length){
+    document.getElementById('fs-stations').innerHTML=[
+      {key:'wu',label:'Warm Up'},{key:'s1',label:'Station 1'},{key:'s2',label:'Station 2'},
+      {key:'s3',label:'Station 3'},{key:'fin',label:'🔥 Finisher'}
+    ].map(s=>`<div class="fs-st" data-key="${s.key}">${s.label}</div>`).join('');
+  }
+  updateFsUI();
+}
+
+function minimizeTimer(){
+  // Hide the overlay but keep timer running — show mini bar at bottom
+  document.getElementById('fs-overlay').classList.remove('open');
+  document.getElementById('timer-bar').classList.add('show');
+  updateTimerBar();
+}
+
+function maximizeTimer(){
+  // Restore overlay from minimized state
+  document.getElementById('timer-bar').classList.remove('show');
+  openTimerOverlay();
+}
+
+function exitTimer(){
+  // Stop timer and close everything
+  document.getElementById('fs-overlay').classList.remove('open');
+  document.getElementById('timer-bar').classList.remove('show');
+  if(BT.running){clearInterval(BT.iv);BT.iv=null;BT.running=false;}
+  document.getElementById('btn-startstop').textContent='▶ Start';
+  document.getElementById('btn-startstop').className='btn-tstart';
+  document.getElementById('fs-btn-pause').textContent='⏸ Pause';
+  document.getElementById('fs-btn-pause').className='fs-btn-pause';
+}
+
+function updateTimerBar(){
+  const ph=BT.phases[BT.phaseIdx];if(!ph)return;
+  const bar=document.getElementById('timer-bar');
+  if(!bar.classList.contains('show'))return;
+  document.getElementById('tbar-phase').textContent=ph.label||'';
+  document.getElementById('tbar-countdown').textContent=fmtTime(BT.secsLeft);
+  document.getElementById('tbar-exercise').textContent=ph.exercise||'';
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render(){
+  const w=S.week;
+  document.getElementById('h-streak').textContent=getStreak()+'🔥';
+  document.getElementById('h-total').textContent=getTotalWorkouts();
+  const earned=S.achievements.filter(a=>a.earned).length;
+  document.getElementById('h-badges').textContent=`${earned}/${ACH_DEFS.length}`;
+  document.getElementById('week-title').textContent=`Week ${w}`;
+  document.getElementById('week-phase').textContent=weekPhase(w);
+  document.getElementById('prog-fill').style.width=(w/52*100)+'%';
+  document.getElementById('prog-lbl').textContent=completedDays(w)+'/3 days complete';
+  document.getElementById('btn-prev').disabled=w<=1;
+  document.getElementById('btn-next').disabled=w>=52;
+
+  // Day tabs
+  const dayTabsEl=document.getElementById('day-tabs');
+  dayTabsEl.innerHTML='';
+  DAYS.forEach(day=>{
+    const done=isDayDone(w,day);
+    const btn=document.createElement('button');
+    btn.className='day-tab'+(S.activeDay===day?' active':'');
+    btn.innerHTML=`<div style="font-size:14px;font-weight:700">${DAY_LABELS[day]}</div><div style="font-size:10px;color:var(--dim);margin-top:2px">${done?'<span style="color:var(--green)">✓ Logged</span>':'Not logged'}</div>`;
+    btn.onclick=()=>selectDay(day);
+    dayTabsEl.appendChild(btn);
+  });
+
+  // Cycling video
+  const vid=getVideo(w,S.activeDay);
+  const phase=getPhase(w);
+  const ytUrl=`https://www.youtube.com/watch?v=${vid.id}`;
+  const thumbUrl=`https://img.youtube.com/vi/${vid.id}/hqdefault.jpg`;
+  document.getElementById('video-container').innerHTML=`
+    <a class="video-row" href="${ytUrl}" target="_blank" rel="noopener">
+      <div class="video-thumb">
+        <img src="${thumbUrl}" alt="${vid.title}" onerror="this.style.display='none'"/>
+        <div class="video-thumb-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
+      </div>
+      <div class="video-meta">
+        <div class="video-title">${vid.title}</div>
+        <div class="video-sub">⏱ ${vid.duration} &nbsp;·&nbsp; ${phase.name}</div>
+      </div>
+      <div class="video-yt-btn">▶ YouTube</div>
+    </a>`;
+
+  // Cycling log status
+  const log=S.history[w]?.days?.[S.activeDay];
+  const st=document.getElementById('cycling-status');
+  const dt=document.getElementById('cycling-detail');
+  const lb=document.getElementById('btn-log-cycling');
+  if(log){st.textContent='✓ Workout logged';st.className='log-status done';dt.textContent=`RPE ${log.rpe}${log.hr?' · '+log.hr+' bpm':''}${log.notes?' · "'+log.notes.slice(0,40)+(log.notes.length>40?'…':'')+'"':''}`;lb.textContent='✏️ Edit Log';lb.className='btn btn-secondary btn-sm';}
+  else{st.textContent='Not logged yet';st.className='log-status';dt.textContent='';lb.textContent='+ Log Workout';lb.className='btn btn-primary btn-sm';}
+
+  // Boxing
+  const bx=getBoxing(w,S.activeDay);
+  document.getElementById('boxing-title').textContent=bx.title;
+  document.getElementById('boxing-subtitle').textContent=`Workout #${bx.id} · ${DAY_LABELS[S.activeDay]}, Week ${w}`;
+  renderStations(bx);
+
+  // Achievements
+  document.getElementById('ach-count').textContent=`${earned}/${ACH_DEFS.length}`;
+  const ag=document.getElementById('ach-grid');ag.innerHTML='';
+  S.achievements.forEach(a=>{const el=document.createElement('div');el.className='ach-item'+(a.earned?' earned':'');el.title=a.requirement;el.innerHTML=`<div class="ach-icon">${a.icon}</div><div><div class="ach-name">${a.title}</div><div class="ach-req">${a.requirement}</div></div>`;ag.appendChild(el);});
+
+  // History
+  const hl=document.getElementById('hist-list');hl.innerHTML='';
+  const weeks=Object.keys(S.history).map(Number).sort((a,b)=>b-a);
+  if(!weeks.length){hl.innerHTML='<div class="dim-txt" style="padding:16px;text-align:center">No workouts logged yet 💪</div>';}
+  else weeks.forEach(wk=>{
+    const days=DAYS.filter(d=>S.history[wk]?.days?.[d]);
+    const logs=Object.values(S.history[wk]?.days||{});
+    const avgRpe=logs.length?(logs.reduce((s,l)=>s+(l.rpe||0),0)/logs.length).toFixed(1):'';
+    const row=document.createElement('div');row.className='hist-row';
+    row.innerHTML=`<div class="hist-week">Wk ${wk}</div><div style="display:flex;gap:5px">${days.map(d=>`<div class="hist-day-pill">${DAY_LABELS[d]}</div>`).join('')}</div>${avgRpe?`<div class="hist-rpe">RPE ${avgRpe}</div>`:''}`;
+    hl.appendChild(row);
+  });
+}
+
+function renderStations(bx,allDone=false){
+  const el=document.getElementById('stations-list');if(!el)return;
+  const ph=BT.phases[BT.phaseIdx];const currentKey=ph?.stKey;
+  const sd=[{key:'s1',label:'Station 1',cls:'lbl-s1',text:bx.station1},{key:'s2',label:'Station 2',cls:'lbl-s2',text:bx.station2},{key:'s3',label:'Station 3',cls:'lbl-s3',text:bx.station3},{key:'fin',label:'🔥 Finisher',cls:'lbl-fin',text:bx.finisher}];
+  el.innerHTML='';
+  sd.forEach(st=>{const isCur=!allDone&&currentKey===st.key&&BT.running;const card=document.createElement('div');card.className='station-card'+(isCur?' current':'');card.dataset.key=st.key;card.innerHTML=`<div class="station-label ${st.cls}">${st.label}</div><div class="station-text">${st.text}</div>`;el.appendChild(card);});
+}
+
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function changeWeek(dir){const nw=S.week+dir;if(nw<1||nw>52)return;stopTimer();S.week=nw;saveState();resetBoxingTimer();render();}
+function selectDay(day){stopTimer();S.activeDay=day;resetBoxingTimer();render();}
+function switchWorkoutTab(tab){
+  S.activeWorkoutTab=tab;
+  ['cycling','boxing','progress'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('active',t===tab);
+    document.getElementById('wtab-'+t).classList.toggle('active',t===tab);
+  });
+}
+function toggleTimerSettings(){
+  const wrap=document.getElementById('tset-wrap');
+  const arrow=document.getElementById('tset-arrow');
+  const isOpen=wrap.classList.contains('expanded');
+  wrap.classList.toggle('collapsed',isOpen);
+  wrap.classList.toggle('expanded',!isOpen);
+  arrow.classList.toggle('open',!isOpen);
+}
+function stopTimer(){if(BT.iv){clearInterval(BT.iv);BT.iv=null;}BT.running=false;}
+function toggleSettings(){document.getElementById('settings-panel').classList.toggle('open');}
+function togglePanel(name){S.panels[name]=!S.panels[name];document.getElementById(name+'-body').classList.toggle('hidden',!S.panels[name]);document.getElementById(name+'-chev').textContent=S.panels[name]?'▲':'▼';}
+
+// ── Achievements ──────────────────────────────────────────────────────────────
+function evaluateAchievements(){
+  const hist=S.history;
+  const allLogs=Object.values(hist).flatMap(wl=>Object.values(wl.days||{})).filter(Boolean);
+  const fullWeeks=Object.keys(hist).map(Number).filter(w=>isWeekDone(w));
+  const streak=getStreak();
+  const monthCounts={};
+  for(const w of fullWeeks){const fl=Object.values(hist[w].days||{})[0];if(fl){const d=new Date(fl.completedAt);const k=`${d.getFullYear()}-${d.getMonth()}`;monthCounts[k]=(monthCounts[k]||0)+1;}}
+  const perfectMonth=Object.values(monthCounts).some(c=>c>=4);
+  const weekNums=Object.keys(hist).map(Number).sort((a,b)=>a-b);
+  let comebackKid=false;for(const w of weekNums){if(w>1&&!hist[w-1]){comebackKid=true;break;}}
+  const notesCount=allLogs.filter(l=>l.notes&&l.notes.trim()).length;
+  const done=S.timerUses.done||0;
+  const cond={
+    consistency_3:streak>=3,consistency_12:streak>=12,
+    dawn_patrol:allLogs.some(l=>new Date(l.completedAt).getHours()<6),
+    night_owl:allLogs.some(l=>new Date(l.completedAt).getHours()>=20),
+    weekend_warrior:allLogs.some(l=>{const d=new Date(l.completedAt).getDay();return d===0||d===6;}),
+    perfect_month:perfectMonth,max_effort:allLogs.some(l=>l.rpe===10),
+    smooth_operator:allLogs.some(l=>l.rpe<=4),
+    heart_rate_champ:allLogs.some(l=>parseInt(l.hr)>150),
+    heavy_pedals:allLogs.some(l=>l.rpe>=8),century_club:allLogs.length>=100,
+    halfway_there:isWeekDone(26),finish_line:isWeekDone(52),streak_5:streak>=5,
+    warmup_king:done>=5,cooldown_king:done>=10,
+    full_rotation:fullWeeks.length>=6,comeback_kid:comebackKid,data_nerd:notesCount>=10,adaptation:isWeekDone(14),
+  };
+  const before=S.achievements.map(a=>a.earned);
+  S.achievements=S.achievements.map(a=>{if(a.earned)return a;return cond[a.id]?{...a,earned:true,earnedAt:new Date().toISOString()}:a;});
+  return S.achievements.filter((a,i)=>a.earned&&!before[i]);
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal(){
+  const w=S.week,day=S.activeDay;const existing=S.history[w]?.days?.[day];
+  S.modalRpe=existing?.rpe||0;
+  document.getElementById('modal-title').textContent=`Log — ${DAY_LABELS[day]}, Week ${w}`;
+  document.getElementById('inp-hr').value=existing?.hr||'';
+  document.getElementById('inp-notes').value=existing?.notes||'';
+  const rg=document.getElementById('rpe-grid');rg.innerHTML='';
+  for(let n=1;n<=10;n++){const btn=document.createElement('button');btn.className='rpe-btn'+(S.modalRpe===n?' sel':'');btn.textContent=n;btn.onclick=()=>{S.modalRpe=n;rg.querySelectorAll('.rpe-btn').forEach((b,i)=>b.classList.toggle('sel',i===n-1));document.getElementById('rpe-hint').textContent=RPE_LABELS[n]||'';};rg.appendChild(btn);}
+  document.getElementById('rpe-hint').textContent=S.modalRpe?RPE_LABELS[S.modalRpe]:'Select RPE';
+  document.getElementById('modal').classList.add('open');document.body.style.overflow='hidden';
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');document.body.style.overflow='';}
+function saveLog(){
+  if(!S.modalRpe){alert('Please select an RPE value.');return;}
+  const w=S.week,day=S.activeDay,hr=document.getElementById('inp-hr').value,notes=document.getElementById('inp-notes').value;
+  if(!S.history[w])S.history[w]={days:{}};
+  S.history[w].days[day]={rpe:S.modalRpe,hr,notes,completedAt:new Date().toISOString()};
+  const unlocked=evaluateAchievements();saveState();closeModal();render();
+  showToast('✅','Workout logged!',`Week ${w} · ${DAY_LABELS[day]}`);
+  unlocked.forEach((a,i)=>setTimeout(()=>showToast(a.icon,'Achievement Unlocked!',a.title),(i+1)*700));
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('modal').classList.contains('open'))closeModal();});
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(icon,title,sub){
+  const c=document.getElementById('toasts');const el=document.createElement('div');el.className='toast';
+  el.innerHTML=`<div class="toast-icon">${icon}</div><div><div class="toast-txt">${title}</div>${sub?`<div class="toast-sub">${sub}</div>`:''}</div>`;
+  c.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .4s';setTimeout(()=>el.remove(),400);},3200);
+}
+
+// ── Reset ─────────────────────────────────────────────────────────────────────
+function confirmReset(){
+  if(confirm('Reset ALL workout data? This cannot be undone.')){
+    S.history={};S.timerUses={done:0};S.week=1;S.activeDay='day1';
+    S.achievements=ACH_DEFS.map(d=>({...d,earned:false,earnedAt:null}));
+    [K.hist,K.ach,K.timers].forEach(k=>localStorage.removeItem(k));
+    localStorage.setItem(K.week,'1');stopTimer();resetBoxingTimer();render();
+    showToast('🗑️','Data reset','Starting fresh!');
+  }
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+loadState();
+const incompleteDays=DAYS.filter(d=>!isDayDone(S.week,d));
+if(incompleteDays.length)S.activeDay=incompleteDays[0];
+render();resetBoxingTimer();
+</script>
+</body>
+</html>
