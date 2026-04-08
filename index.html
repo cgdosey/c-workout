@@ -5,59 +5,93 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>C-Workout</title>
 <style>
-:root{--bg:#0f0f11;--surface:#1a1a1f;--surface2:#24242b;--border:#2e2e38;--accent:#e8f048;--accent-dim:#b8c020;--text:#f0f0f4;--dim:#8888a0;--red:#ff4d4d;--orange:#ff9a3c;--blue:#4d9fff;--green:#4dff91;--r:12px}
+:root{--bg:#09090f;--surface:#12121c;--surface2:#1c1c28;--border:#252535;--accent:#e8f048;--accent-dim:#b8c020;--text:#f0f0f6;--dim:#5a5a80;--red:#e63946;--orange:#ff9a3c;--blue:#4d9fff;--green:#4dff91;--r:14px}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
-.app{max-width:980px;margin:0 auto;padding:16px}
+.app{max-width:900px;margin:0 auto;padding:0 16px 60px}
 
-/* Header */
-.header{display:flex;align-items:center;justify-content:space-between;padding:14px 0 20px;flex-wrap:wrap;gap:12px}
-.logo{font-size:22px;font-weight:800;letter-spacing:-.5px}.logo span{color:var(--accent)}
-.stats{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-.stat{text-align:center}.stat-val{font-size:20px;font-weight:700;color:var(--accent);line-height:1}.stat-lbl{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+/* ── TOP BAR ─────────────────────────────────────── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 0 0;gap:10px;flex-wrap:wrap}
+.topbar-logo{font-size:20px;font-weight:900;letter-spacing:-.5px}
+.topbar-logo span{color:var(--accent)}
+.topbar-meta{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:10px}
+.topbar-meta b{color:var(--text);font-weight:700}
+.topbar-meta .sep{color:var(--border)}
 
-/* Week nav */
-.week-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px}
-.week-info{text-align:center}
-.week-title{font-size:17px;font-weight:700}
-.week-phase{font-size:11px;color:var(--dim);margin-top:2px}
-.prog-bar{width:140px;height:4px;background:var(--surface2);border-radius:2px;margin:6px auto 0}
-.prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s}
-.prog-lbl{font-size:11px;color:var(--dim);margin-top:4px}
-.btn-icon{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+/* ── MAIN TABS (pill) ────────────────────────────── */
+.main-tabs{display:flex;gap:8px;padding:16px 0 6px;flex-wrap:wrap}
+.mtab{padding:10px 22px;border-radius:100px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--surface2);color:var(--dim);transition:all .2s}
+.mtab:hover{color:var(--text);background:var(--border)}
+.mtab.active{background:var(--red);color:#fff}
+
+/* ── GENERIC CARD ────────────────────────────────── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-top:14px;overflow:hidden}
+.tab-content{display:none}.tab-content.active{display:block}
+.btn-icon{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
 .btn-icon:hover{background:var(--border)}.btn-icon:disabled{opacity:.3;cursor:default}
 
-/* Day selector */
-.day-tabs{display:flex;gap:8px;margin-bottom:16px}
-.day-tab{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface);cursor:pointer;text-align:center;transition:all .15s;font-size:13px;font-weight:600;color:var(--dim)}
-.day-tab:hover{background:var(--surface2);color:var(--text)}
+/* ── STATS ROW ───────────────────────────────────── */
+.stats-row{display:flex;align-items:center;gap:20px;padding:14px 18px;flex-wrap:wrap}
+.stat-chip{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:var(--text)}
+.stat-chip small{font-weight:400;color:var(--dim);font-size:13px}
+.stat-chip-icon{font-size:17px}
+
+/* ── PHASE CARD ──────────────────────────────────── */
+.phase-card{padding:20px 20px 18px}
+.phase-badge{display:inline-flex;align-items:center;background:rgba(90,90,180,.15);border:1px solid rgba(90,90,180,.3);color:#9090c0;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;padding:4px 10px;border-radius:100px;margin-bottom:12px}
+.phase-name{font-size:28px;font-weight:900;margin-bottom:4px}
+.phase-focus{font-size:13px;color:var(--dim);margin-bottom:18px;line-height:1.5}
+.phase-bar-track{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-bottom:7px}
+.phase-bar-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .5s}
+.phase-markers{display:flex;justify-content:space-between;margin-bottom:14px}
+.phase-marker{font-size:10px;color:var(--dim)}
+.phase-buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.phase-btn{padding:10px 4px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--dim);font-size:11px;font-weight:700;cursor:pointer;text-align:center;line-height:1.35;transition:all .15s}
+.phase-btn:hover{color:var(--text);border-color:var(--dim)}
+.phase-btn.active{background:rgba(232,240,72,.1);border-color:var(--accent);color:var(--accent)}
+.phase-btn-num{font-size:9px;opacity:.6;display:block;margin-bottom:2px}
+
+/* ── WEEK NAV CARD ───────────────────────────────── */
+.week-nav-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px}
+.week-center{text-align:center;flex:1}
+.week-big{font-size:48px;font-weight:900;line-height:1;color:var(--text)}
+.week-of{font-size:13px;color:var(--dim);margin-top:3px}
+.week-dots{display:flex;gap:8px;justify-content:center;margin-top:10px}
+.week-dot{width:11px;height:11px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);transition:all .2s}
+.week-dot.done{background:var(--green);border-color:var(--green)}
+
+/* ── SECTION HEADER ──────────────────────────────── */
+.section-hdr{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--dim);padding:22px 0 12px;text-align:center}
+
+/* ── WORKOUT CARDS GRID ──────────────────────────── */
+.workout-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:620px){.workout-grid{grid-template-columns:1fr}}
+.workout-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .2s}
+.workout-card.logged{border-color:rgba(77,255,145,.3)}
+.wcard-thumb{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden;display:block;text-decoration:none}
+.wcard-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:filter .2s}
+.workout-card:hover .wcard-thumb img{filter:brightness(.75)}
+.wcard-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.wcard-play svg{width:36px;height:36px;fill:rgba(255,255,255,.9);filter:drop-shadow(0 2px 8px rgba(0,0,0,.8))}
+.wcard-day-badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);border-radius:6px;padding:4px 8px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#fff}
+.wcard-done-badge{position:absolute;top:8px;right:8px;background:rgba(77,255,145,.18);border:1px solid rgba(77,255,145,.35);border-radius:6px;padding:3px 7px;font-size:10px;font-weight:700;color:var(--green)}
+.wcard-body{padding:12px}
+.wcard-title{font-size:13px;font-weight:700;line-height:1.3;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wcard-sub{font-size:11px;color:var(--dim);margin-bottom:10px}
+.wcard-footer{display:flex;gap:7px;align-items:center}
+.wcard-log-btn{flex:1;padding:8px 0;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:var(--accent);color:#000;transition:background .15s}
+.wcard-log-btn:hover{background:var(--accent-dim)}
+.wcard-log-btn.edit{background:transparent;border:1px solid var(--border);color:var(--dim)}
+.wcard-log-btn.edit:hover{color:var(--text)}
+.wcard-yt{width:34px;height:34px;border-radius:8px;background:#e00;display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;transition:background .15s}
+.wcard-yt:hover{background:#c00}
+.wcard-yt svg{width:13px;height:13px;fill:#fff;margin-left:2px}
+
+/* ── BOXING ──────────────────────────────────────── */
+.day-tabs{display:flex;gap:8px;padding:16px 16px 0}
+.day-tab{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;text-align:center;transition:all .15s;font-size:13px;font-weight:600;color:var(--dim)}
+.day-tab:hover{background:var(--border);color:var(--text)}
 .day-tab.active{background:rgba(232,240,72,.1);border-color:var(--accent);color:var(--accent)}
-
-/* Workout tabs */
-.workout-tabs{display:flex;border-bottom:1px solid var(--border)}
-.wtab{padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:var(--dim);transition:all .15s;background:none;border-top:none;border-left:none;border-right:none}
-.wtab:hover{color:var(--text)}.wtab.active{color:var(--accent);border-bottom-color:var(--accent)}
-
-/* Panels */
-.workout-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:18px}
-.tab-content{display:none}.tab-content.active{display:block}
-
-/* Video compact row */
-.video-row{display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--surface);border-bottom:1px solid var(--border);text-decoration:none;color:inherit;transition:background .15s;cursor:pointer}
-.video-row:hover{background:var(--surface2)}
-.video-thumb{position:relative;width:100px;height:56px;border-radius:6px;overflow:hidden;background:#000;flex-shrink:0}
-.video-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.video-thumb-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)}
-.video-thumb-play svg{width:20px;height:20px;fill:#fff;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}
-.video-meta{flex:1;min-width:0}
-.video-title{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.video-sub{font-size:12px;color:var(--dim);margin-top:3px}
-.video-yt-btn{padding:7px 14px;border-radius:8px;background:#ff0000;color:#fff;font-size:12px;font-weight:700;white-space:nowrap;border:none;flex-shrink:0}
-.log-section{padding:14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-.log-status{font-size:13px;color:var(--dim)}.log-status.done{color:var(--green)}
-.log-detail{font-size:12px;color:var(--dim);margin-top:2px}
-
-/* Boxing panel */
 .boxing-header{padding:16px 18px;border-bottom:1px solid var(--border)}
 .boxing-title-main{font-size:18px;font-weight:800;margin-bottom:4px}
 .boxing-subtitle{font-size:12px;color:var(--dim)}
@@ -143,8 +177,8 @@ html,body{background:var(--bg);color:var(--text);font-family:-apple-system,Blink
 .tbar-exercise{font-size:13px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
 .tbar-expand{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:var(--accent);color:#000}
 
-/* Bottom panels */
-.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+/* ── PROGRESS PANELS ─────────────────────────────── */
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px 0}
 @media(max-width:600px){.bottom-row{grid-template-columns:1fr}}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
 .panel-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
@@ -163,20 +197,16 @@ html,body{background:var(--bg);color:var(--text);font-family:-apple-system,Blink
 .hist-day-pill{padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(232,240,72,.1);color:var(--accent)}
 .hist-rpe{color:var(--dim);font-size:11px;margin-left:auto}
 
-/* Settings */
-.settings-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:18px;display:none}
+/* ── SETTINGS ────────────────────────────────────── */
+.settings-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-top:14px;display:none}
 .settings-panel.open{display:block}
-.video-slots{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
-@media(max-width:500px){.video-slots{grid-template-columns:1fr}}
-.video-slot{background:var(--surface2);border-radius:8px;padding:12px}
-.slot-lbl{font-size:11px;color:var(--dim);margin-bottom:6px}
 
-/* Buttons */
+/* ── BUTTONS ─────────────────────────────────────── */
 .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
 .btn-primary{background:var(--accent);color:#000}.btn-primary:hover{background:var(--accent-dim)}
 .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--border)}
 .btn-sm{padding:6px 12px;font-size:12px}
-.btn-danger{background:rgba(255,77,77,.12);color:var(--red);border:1px solid rgba(255,77,77,.3)}.btn-danger:hover{background:rgba(255,77,77,.22)}
+.btn-danger{background:rgba(230,57,70,.12);color:var(--red);border:1px solid rgba(230,57,70,.3)}.btn-danger:hover{background:rgba(230,57,70,.22)}
 
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
@@ -242,72 +272,94 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:3px
 <!-- ── MAIN APP ────────────────────────────────────────────────────── -->
 <div class="app" id="app">
 
-  <!-- Header -->
-  <div class="header">
-    <div>
-      <div class="logo">C<span>-</span>Workout</div>
-      <div class="dim-txt">Boxing + Cycling · 52-Week Program</div>
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-logo">C<span>-</span>Workout</div>
+    <div class="topbar-meta">
+      <span>🔥 <b id="h-streak">0</b> streak</span>
+      <span class="sep">|</span>
+      <span>Week <b id="h-week">1</b>/52</span>
+      <span class="sep">|</span>
+      <span><b id="h-total">0</b> workouts done</span>
     </div>
-    <div class="stats">
-      <div class="stat"><div class="stat-val" id="h-streak">0🔥</div><div class="stat-lbl">Streak</div></div>
-      <div class="stat"><div class="stat-val" id="h-total">0</div><div class="stat-lbl">Workouts</div></div>
-      <div class="stat"><div class="stat-val" id="h-badges">0/20</div><div class="stat-lbl">Badges</div></div>
-      <button class="btn btn-secondary btn-sm" onclick="toggleSettings()">⚙️ Settings</button>
-    </div>
+    <button class="btn-icon" onclick="toggleSettings()" title="Settings" style="font-size:15px">⚙️</button>
   </div>
 
   <!-- Settings -->
   <div class="settings-panel" id="settings-panel">
-    <div style="font-size:14px;font-weight:700;margin-bottom:8px">⚙️ Settings</div>
-    <div class="flex-gap" style="margin-top:4px">
+    <div style="font-size:14px;font-weight:700;margin-bottom:10px">⚙️ Settings</div>
+    <div class="flex-gap">
       <button class="btn btn-secondary btn-sm" onclick="toggleSettings()">Close</button>
       <button class="btn btn-danger btn-sm" onclick="confirmReset()">🗑️ Reset All Data</button>
     </div>
   </div>
 
-  <!-- Week nav -->
-  <div class="week-nav">
-    <button class="btn-icon" id="btn-prev" onclick="changeWeek(-1)">‹</button>
-    <div class="week-info">
-      <div class="week-title" id="week-title">Week 1</div>
-      <div class="week-phase" id="week-phase"></div>
-      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:2%"></div></div>
-      <div class="prog-lbl" id="prog-lbl">0/3 days complete</div>
-    </div>
-    <button class="btn-icon" id="btn-next" onclick="changeWeek(1)">›</button>
+  <!-- Main tabs -->
+  <div class="main-tabs">
+    <button class="mtab active" id="mtab-cycling" onclick="switchWorkoutTab('cycling')">🚴 Cycling</button>
+    <button class="mtab" id="mtab-boxing" onclick="switchWorkoutTab('boxing')">🥊 Boxing</button>
+    <button class="mtab" id="mtab-progress" onclick="switchWorkoutTab('progress')">🏆 Progress</button>
   </div>
 
-  <!-- Day selector -->
-  <div class="day-tabs" id="day-tabs"></div>
+  <!-- ── CYCLING TAB ──────────────────────────────── -->
+  <div class="tab-content active" id="tab-cycling">
 
-  <!-- Workout panel -->
-  <div class="workout-panel">
-    <div class="workout-tabs">
-      <button class="wtab active" id="wtab-cycling" onclick="switchWorkoutTab('cycling')">🚴 Cycling</button>
-      <button class="wtab" id="wtab-boxing" onclick="switchWorkoutTab('boxing')">🥊 Boxing</button>
-      <button class="wtab" id="wtab-progress" onclick="switchWorkoutTab('progress')">🏆 Progress</button>
-    </div>
-
-    <!-- CYCLING TAB -->
-    <div class="tab-content active" id="tab-cycling">
-      <div id="video-container"></div>
-      <div class="log-section">
-        <div>
-          <div class="log-status" id="cycling-status">Not logged yet</div>
-          <div class="log-detail" id="cycling-detail"></div>
-        </div>
-        <button class="btn btn-primary btn-sm" id="btn-log-cycling" onclick="openModal()">+ Log Workout</button>
+    <!-- Stats -->
+    <div class="card">
+      <div class="stats-row">
+        <div class="stat-chip"><span class="stat-chip-icon">🔥</span><span id="cy-streak">0</span> <small>Week Streak</small></div>
+        <div class="stat-chip"><span class="stat-chip-icon">🏆</span><span id="cy-badges">0/20</span> <small>achievements</small></div>
+        <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="switchWorkoutTab('progress')">All Badges ›</button>
       </div>
     </div>
 
-    <!-- BOXING TAB -->
-    <div class="tab-content" id="tab-boxing">
-      <div class="boxing-header">
+    <!-- Phase card -->
+    <div class="card">
+      <div class="phase-card" id="phase-card">
+        <div class="phase-badge" id="phase-badge">Phase 1 of 4</div>
+        <div class="phase-name" id="phase-name">Foundation</div>
+        <div class="phase-focus" id="phase-focus">Building aerobic base and pedal stroke efficiency.</div>
+        <div class="phase-bar-track"><div class="phase-bar-fill" id="phase-bar" style="width:2%"></div></div>
+        <div class="phase-markers">
+          <span class="phase-marker">Week 1</span>
+          <span class="phase-marker">Wk 14</span>
+          <span class="phase-marker">Wk 27</span>
+          <span class="phase-marker">Wk 40</span>
+          <span class="phase-marker">Week 52</span>
+        </div>
+        <div class="phase-buttons" id="phase-buttons"></div>
+      </div>
+    </div>
+
+    <!-- Week nav -->
+    <div class="card">
+      <div class="week-nav-inner">
+        <button class="btn-icon" id="btn-prev" onclick="changeWeek(-1)">‹</button>
+        <div class="week-center">
+          <div class="week-big" id="week-big">1</div>
+          <div class="week-of">/ 52 weeks</div>
+          <div class="week-dots" id="week-dots"></div>
+        </div>
+        <button class="btn-icon" id="btn-next" onclick="changeWeek(1)">›</button>
+      </div>
+    </div>
+
+    <!-- Workout cards -->
+    <div class="section-hdr">This Week's Workouts</div>
+    <div class="workout-grid" id="workout-grid"></div>
+
+  </div>
+
+  <!-- ── BOXING TAB ────────────────────────────────── -->
+  <div class="tab-content" id="tab-boxing">
+    <div class="card" style="overflow:visible">
+      <!-- Day selector inside boxing tab -->
+      <div class="day-tabs" id="day-tabs"></div>
+      <div class="boxing-header" style="margin-top:14px">
         <div class="boxing-title-main" id="boxing-title">—</div>
         <div class="boxing-subtitle" id="boxing-subtitle"></div>
       </div>
       <div class="stations" id="stations-list"></div>
-
       <!-- Guided Timer -->
       <div class="timer-section">
         <div class="timer-main">
@@ -341,31 +393,30 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:3px
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- PROGRESS TAB -->
-    <div class="tab-content" id="tab-progress">
-      <div class="bottom-row">
-        <div class="panel">
-          <div class="panel-hdr" onclick="togglePanel('ach')">
-            <div class="panel-title">🏆 Achievements <span id="ach-count" style="font-size:11px;font-weight:400;color:var(--dim)">0/20</span></div>
-            <span class="chev" id="ach-chev">▼</span>
-          </div>
-          <div class="panel-body" id="ach-body">
-            <div class="scroll-area"><div class="ach-grid" id="ach-grid"></div></div>
-          </div>
+  <!-- ── PROGRESS TAB ──────────────────────────────── -->
+  <div class="tab-content" id="tab-progress">
+    <div class="bottom-row">
+      <div class="panel">
+        <div class="panel-hdr" onclick="togglePanel('ach')">
+          <div class="panel-title">🏆 Achievements <span id="ach-count" style="font-size:11px;font-weight:400;color:var(--dim)">0/20</span></div>
+          <span class="chev" id="ach-chev">▲</span>
         </div>
-        <div class="panel">
-          <div class="panel-hdr" onclick="togglePanel('hist')">
-            <div class="panel-title">📋 History</div>
-            <span class="chev" id="hist-chev">▼</span>
-          </div>
-          <div class="panel-body" id="hist-body">
-            <div class="scroll-area" id="hist-list"></div>
-          </div>
+        <div class="panel-body" id="ach-body">
+          <div class="scroll-area"><div class="ach-grid" id="ach-grid"></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr" onclick="togglePanel('hist')">
+          <div class="panel-title">📋 History</div>
+          <span class="chev" id="hist-chev">▲</span>
+        </div>
+        <div class="panel-body" id="hist-body">
+          <div class="scroll-area" id="hist-list"></div>
         </div>
       </div>
     </div>
-
   </div>
 
 </div><!-- /app -->
@@ -824,54 +875,82 @@ function updateTimerBar(){
 // ── Render ────────────────────────────────────────────────────────────────────
 function render(){
   const w=S.week;
-  document.getElementById('h-streak').textContent=getStreak()+'🔥';
-  document.getElementById('h-total').textContent=getTotalWorkouts();
   const earned=S.achievements.filter(a=>a.earned).length;
-  document.getElementById('h-badges').textContent=`${earned}/${ACH_DEFS.length}`;
-  document.getElementById('week-title').textContent=`Week ${w}`;
-  document.getElementById('week-phase').textContent=weekPhase(w);
-  document.getElementById('prog-fill').style.width=(w/52*100)+'%';
-  document.getElementById('prog-lbl').textContent=completedDays(w)+'/3 days complete';
+  const streak=getStreak();
+  const total=getTotalWorkouts();
+  const phase=getPhase(w);
+  const phaseIdx=WORKOUT_DATA.phases.indexOf(phase);
+
+  // Top bar
+  document.getElementById('h-streak').textContent=streak;
+  document.getElementById('h-week').textContent=w;
+  document.getElementById('h-total').textContent=total;
+
+  // Stats row (cycling tab)
+  document.getElementById('cy-streak').textContent=streak;
+  document.getElementById('cy-badges').textContent=`${earned}/${ACH_DEFS.length}`;
+
+  // Phase card
+  document.getElementById('phase-badge').textContent=`Phase ${phaseIdx+1} of ${WORKOUT_DATA.phases.length}`;
+  document.getElementById('phase-name').textContent=phase.name;
+  document.getElementById('phase-focus').textContent=phase.focus;
+  document.getElementById('phase-bar').style.width=(w/52*100)+'%';
+  const pb=document.getElementById('phase-buttons');
+  pb.innerHTML='';
+  WORKOUT_DATA.phases.forEach((p,i)=>{
+    const btn=document.createElement('button');
+    btn.className='phase-btn'+(i===phaseIdx?' active':'');
+    btn.innerHTML=`<span class="phase-btn-num">P${i+1}</span>${p.name}`;
+    btn.onclick=()=>{S.week=p.range[0];saveState();resetBoxingTimer();render();};
+    pb.appendChild(btn);
+  });
+
+  // Week nav
+  document.getElementById('week-big').textContent=w;
   document.getElementById('btn-prev').disabled=w<=1;
   document.getElementById('btn-next').disabled=w>=52;
+  const dotsEl=document.getElementById('week-dots');
+  dotsEl.innerHTML=DAYS.map(d=>`<div class="week-dot${isDayDone(w,d)?' done':''}"></div>`).join('');
 
-  // Day tabs
+  // Workout grid — all 3 days
+  const DAY_TYPE={day1:'HIIT',day2:'Endurance',day3:'Power'};
+  const grid=document.getElementById('workout-grid');grid.innerHTML='';
+  DAYS.forEach(day=>{
+    const vid=getVideo(w,day);
+    const log=S.history[w]?.days?.[day];
+    const ytUrl=`https://www.youtube.com/watch?v=${vid.id}`;
+    const thumb=`https://img.youtube.com/vi/${vid.id}/hqdefault.jpg`;
+    const card=document.createElement('div');
+    card.className='workout-card'+(log?' logged':'');
+    card.innerHTML=`
+      <a class="wcard-thumb" href="${ytUrl}" target="_blank" rel="noopener">
+        <img src="${thumb}" alt="${vid.title}" onerror="this.style.background='var(--surface2)'"/>
+        <div class="wcard-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
+        <div class="wcard-day-badge">${DAY_LABELS[day]} — ${DAY_TYPE[day]}</div>
+        ${log?'<div class="wcard-done-badge">✓ Done</div>':''}
+      </a>
+      <div class="wcard-body">
+        <div class="wcard-title">${vid.title}</div>
+        <div class="wcard-sub">⏱ ${vid.duration} · ${phase.name}</div>
+        <div class="wcard-footer">
+          <button class="wcard-log-btn${log?' edit':''}" onclick="openModal('${day}')">${log?'✏️ Edit Log':'+ Log Workout'}</button>
+          <a class="wcard-yt" href="${ytUrl}" target="_blank" rel="noopener" title="Watch on YouTube"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></a>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  // Day tabs (boxing)
   const dayTabsEl=document.getElementById('day-tabs');
   dayTabsEl.innerHTML='';
   DAYS.forEach(day=>{
     const done=isDayDone(w,day);
     const btn=document.createElement('button');
     btn.className='day-tab'+(S.activeDay===day?' active':'');
-    btn.innerHTML=`<div style="font-size:14px;font-weight:700">${DAY_LABELS[day]}</div><div style="font-size:10px;color:var(--dim);margin-top:2px">${done?'<span style="color:var(--green)">✓ Logged</span>':'Not logged'}</div>`;
+    btn.innerHTML=`<div style="font-size:13px;font-weight:700">${DAY_LABELS[day]}</div><div style="font-size:10px;margin-top:2px">${done?'<span style="color:var(--green)">✓</span>':''}</div>`;
     btn.onclick=()=>selectDay(day);
     dayTabsEl.appendChild(btn);
   });
-
-  // Cycling video
-  const vid=getVideo(w,S.activeDay);
-  const phase=getPhase(w);
-  const ytUrl=`https://www.youtube.com/watch?v=${vid.id}`;
-  const thumbUrl=`https://img.youtube.com/vi/${vid.id}/hqdefault.jpg`;
-  document.getElementById('video-container').innerHTML=`
-    <a class="video-row" href="${ytUrl}" target="_blank" rel="noopener">
-      <div class="video-thumb">
-        <img src="${thumbUrl}" alt="${vid.title}" onerror="this.style.display='none'"/>
-        <div class="video-thumb-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
-      </div>
-      <div class="video-meta">
-        <div class="video-title">${vid.title}</div>
-        <div class="video-sub">⏱ ${vid.duration} &nbsp;·&nbsp; ${phase.name}</div>
-      </div>
-      <div class="video-yt-btn">▶ YouTube</div>
-    </a>`;
-
-  // Cycling log status
-  const log=S.history[w]?.days?.[S.activeDay];
-  const st=document.getElementById('cycling-status');
-  const dt=document.getElementById('cycling-detail');
-  const lb=document.getElementById('btn-log-cycling');
-  if(log){st.textContent='✓ Workout logged';st.className='log-status done';dt.textContent=`RPE ${log.rpe}${log.hr?' · '+log.hr+' bpm':''}${log.notes?' · "'+log.notes.slice(0,40)+(log.notes.length>40?'…':'')+'"':''}`;lb.textContent='✏️ Edit Log';lb.className='btn btn-secondary btn-sm';}
-  else{st.textContent='Not logged yet';st.className='log-status';dt.textContent='';lb.textContent='+ Log Workout';lb.className='btn btn-primary btn-sm';}
 
   // Boxing
   const bx=getBoxing(w,S.activeDay);
@@ -914,7 +993,7 @@ function switchWorkoutTab(tab){
   S.activeWorkoutTab=tab;
   ['cycling','boxing','progress'].forEach(t=>{
     document.getElementById('tab-'+t).classList.toggle('active',t===tab);
-    document.getElementById('wtab-'+t).classList.toggle('active',t===tab);
+    document.getElementById('mtab-'+t).classList.toggle('active',t===tab);
   });
 }
 function toggleTimerSettings(){
@@ -961,10 +1040,10 @@ function evaluateAchievements(){
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
-function openModal(){
-  const w=S.week,day=S.activeDay;const existing=S.history[w]?.days?.[day];
+function openModal(day){
+  const w=S.week;S.modalDay=day||S.activeDay;const existing=S.history[w]?.days?.[S.modalDay];
   S.modalRpe=existing?.rpe||0;
-  document.getElementById('modal-title').textContent=`Log — ${DAY_LABELS[day]}, Week ${w}`;
+  document.getElementById('modal-title').textContent=`Log — ${DAY_LABELS[S.modalDay]}, Week ${w}`;
   document.getElementById('inp-hr').value=existing?.hr||'';
   document.getElementById('inp-notes').value=existing?.notes||'';
   const rg=document.getElementById('rpe-grid');rg.innerHTML='';
@@ -975,7 +1054,7 @@ function openModal(){
 function closeModal(){document.getElementById('modal').classList.remove('open');document.body.style.overflow='';}
 function saveLog(){
   if(!S.modalRpe){alert('Please select an RPE value.');return;}
-  const w=S.week,day=S.activeDay,hr=document.getElementById('inp-hr').value,notes=document.getElementById('inp-notes').value;
+  const w=S.week,day=S.modalDay||S.activeDay,hr=document.getElementById('inp-hr').value,notes=document.getElementById('inp-notes').value;
   if(!S.history[w])S.history[w]={days:{}};
   S.history[w].days[day]={rpe:S.modalRpe,hr,notes,completedAt:new Date().toISOString()};
   const unlocked=evaluateAchievements();saveState();closeModal();render();
