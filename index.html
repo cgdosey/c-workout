@@ -146,6 +146,14 @@ html,body{background:var(--bg);color:var(--text);font-family:-apple-system,Blink
 .tset-toggle:hover{color:var(--lime)}
 .tset-toggle-arrow{transition:transform .25s;display:inline-block}
 .tset-toggle-arrow.open{transform:rotate(90deg)}
+/* Boxing presets */
+.bx-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 16px;border-top:1px solid var(--glass-border)}
+.bx-preset-btn{padding:12px 8px;border-radius:14px;border:1px solid var(--border);background:var(--surface);cursor:pointer;text-align:center;transition:all .18s;color:var(--dim)}
+.bx-preset-btn:hover{background:var(--surface2);border-color:var(--dim)}
+.bx-preset-btn.active{border-color:var(--lime);background:rgba(204,255,0,.07);box-shadow:0 0 12px rgba(204,255,0,.1)}
+.bx-preset-btn.active .bx-preset-name{color:var(--lime)}
+.bx-preset-name{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
+.bx-preset-meta{font-size:10px;color:var(--dim);line-height:1.5}
 
 /* ── FULLSCREEN OVERLAY ─────────────────────────────────── */
 #fs-overlay{
@@ -338,6 +346,68 @@ html,body{background:var(--bg);color:var(--text);font-family:-apple-system,Blink
 a{color:var(--lime)}
 code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px}
 .flex-gap{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* ── REST TIMER BAR ──────────────────────────────── */
+#rest-timer-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:900px;z-index:402;background:#1c1c1c;border-top:2px solid var(--lime);padding:10px 20px;display:flex;align-items:center;gap:14px;transition:transform .35s cubic-bezier(.32,.72,0,1);box-shadow:0 -4px 24px rgba(204,255,0,.12)}
+#rest-timer-bar.show{transform:translateX(-50%) translateY(0)}
+.rest-bar-label{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--lime);white-space:nowrap}
+.rest-bar-countdown{font-size:22px;font-weight:900;color:var(--text);font-variant-numeric:tabular-nums;min-width:44px;line-height:1}
+.rest-bar-track{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.rest-bar-fill{height:100%;background:var(--lime);border-radius:3px;transition:width .95s linear;box-shadow:0 0 8px rgba(204,255,0,.4)}
+.rest-bar-skip{padding:6px 14px;border-radius:10px;background:transparent;border:1px solid var(--border);color:var(--dim);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.rest-bar-skip:hover{border-color:var(--lime);color:var(--lime)}
+.rest-dur-btns{display:flex;gap:5px;flex-shrink:0}
+.rest-dur-btn{padding:4px 9px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--dim);font-size:10px;font-weight:800;cursor:pointer;transition:all .12s}
+.rest-dur-btn.active{background:rgba(204,255,0,.1);border-color:var(--lime);color:var(--lime)}
+.rest-dur-btn:hover{border-color:var(--dim);color:var(--text)}
+
+/* ── PROGRESSIVE OVERLOAD HINT ───────────────────── */
+.overload-hint{font-size:11px;color:var(--dim);background:rgba(204,255,0,.05);border-radius:10px;padding:8px 12px;margin-bottom:16px;border-left:3px solid var(--lime);line-height:1.5}
+.overload-hint strong{color:var(--lime)}
+
+/* ── CALENDAR HEAT MAP ───────────────────────────── */
+.cal-section{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;margin-top:14px;overflow:hidden}
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--glass-border)}
+.cal-month-title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px}
+.cal-nav{display:flex;gap:6px}
+.cal-nav-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:30px;height:30px;border-radius:9px;cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.cal-nav-btn:hover{border-color:var(--lime);color:var(--lime)}
+.cal-body{padding:12px 14px 16px}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:5px}
+.cal-wd{font-size:8px;font-weight:800;color:var(--dim);text-align:center;text-transform:uppercase;letter-spacing:1px;padding:3px 0}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--dim);position:relative}
+.cal-day.today{background:var(--surface2);color:var(--text);border:1px solid var(--dim)}
+.cal-day.active{color:var(--text)}
+.cal-dots{display:flex;gap:2px;position:absolute;bottom:2px;left:50%;transform:translateX(-50%)}
+.cal-dot{width:4px;height:4px;border-radius:50%}
+.cal-dot.cycling{background:var(--blue)}
+.cal-dot.strength{background:var(--lime)}
+.cal-dot.boxing{background:var(--orange)}
+.cal-legend{display:flex;gap:14px;flex-wrap:wrap;padding:6px 14px 14px;font-size:10px;color:var(--dim)}
+.cal-legend-item{display:flex;align-items:center;gap:5px;font-weight:700}
+
+/* ── BODY WEIGHT LOG ─────────────────────────────── */
+.bw-section{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;margin-top:14px;overflow:hidden}
+.bw-hdr{padding:14px 18px;border-bottom:1px solid var(--glass-border);font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px}
+.bw-body{padding:14px 16px 18px}
+.bw-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.bw-input{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 14px;color:var(--text);font-size:18px;font-weight:800;outline:none;font-family:inherit;transition:border-color .15s;width:100px;text-align:center}
+.bw-input:focus{border-color:var(--lime)}
+.bw-unit{font-size:12px;color:var(--dim);font-weight:600}
+.bw-save-btn{padding:9px 18px;border-radius:10px;background:var(--lime);color:#000;border:none;font-size:13px;font-weight:800;cursor:pointer;transition:background .15s}
+.bw-save-btn:hover{background:var(--lime-dim)}
+.bw-history{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.bw-history::-webkit-scrollbar{display:none}
+.bw-hist-chip{flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:7px 11px;text-align:center;min-width:56px}
+.bw-hist-date{font-size:9px;color:var(--dim);margin-bottom:3px;font-weight:600}
+.bw-hist-val{font-size:14px;font-weight:900;color:var(--text)}
+
+/* ── BOXING SESSION HISTORY ──────────────────────── */
+.bx-log-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;font-size:12px;margin-bottom:6px;border:1px solid var(--border)}
+.bx-log-date{font-weight:800;color:var(--orange);min-width:64px;font-size:11px}
+.bx-log-title{flex:1;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bx-log-pill{padding:2px 8px;border-radius:6px;font-size:10px;background:rgba(255,154,60,.1);color:var(--orange);font-weight:700;border:1px solid rgba(255,154,60,.2);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -395,12 +465,22 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px
         <div class="topbar-chip-lbl">Sessions</div>
       </div>
     </div>
-    <button class="btn-icon" onclick="toggleSettings()" title="Settings" style="font-size:13px;letter-spacing:.5px;font-weight:800">SET</button>
+    <button class="btn-icon" onclick="toggleSettings()" title="Settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
   </div>
 
   <!-- Settings -->
   <div class="settings-panel" id="settings-panel">
-    <div style="font-size:14px;font-weight:700;margin-bottom:10px">Settings</div>
+    <div style="font-size:14px;font-weight:700;margin-bottom:14px">Settings</div>
+    <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px">Rest Timer Duration</div>
+    <div class="flex-gap" style="margin-bottom:16px">
+      <button class="rest-dur-btn" data-dur="45" onclick="setRestDuration(45)">45s</button>
+      <button class="rest-dur-btn" data-dur="60" onclick="setRestDuration(60)">60s</button>
+      <button class="rest-dur-btn active" data-dur="90" onclick="setRestDuration(90)">90s</button>
+      <button class="rest-dur-btn" data-dur="120" onclick="setRestDuration(120)">2 min</button>
+      <button class="rest-dur-btn" data-dur="180" onclick="setRestDuration(180)">3 min</button>
+    </div>
     <div class="flex-gap">
       <button class="btn btn-secondary btn-sm" onclick="toggleSettings()">Close</button>
       <button class="btn btn-danger btn-sm" onclick="confirmReset()">Reset All Data</button>
@@ -502,8 +582,24 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px
           <button class="btn-tstart" id="btn-startstop" onclick="toggleBoxingTimer()">▶ Start</button>
           <button class="btn-tskip" onclick="skipPhase()">Skip ›</button>
         </div>
+        <!-- Preset buttons -->
+        <div class="bx-presets" id="bx-presets">
+          <button class="bx-preset-btn" data-preset="quick" onclick="applyBoxingPreset('quick')">
+            <span class="bx-preset-name">Quick</span>
+            <span class="bx-preset-meta">1 min work<br>30s rest<br>2 rounds</span>
+          </button>
+          <button class="bx-preset-btn active" data-preset="standard" onclick="applyBoxingPreset('standard')">
+            <span class="bx-preset-name">Standard</span>
+            <span class="bx-preset-meta">2 min work<br>45s rest<br>3 rounds</span>
+          </button>
+          <button class="bx-preset-btn" data-preset="hard" onclick="applyBoxingPreset('hard')">
+            <span class="bx-preset-name">Hard</span>
+            <span class="bx-preset-meta">3 min work<br>30s rest<br>4 rounds</span>
+          </button>
+        </div>
+        <!-- Custom settings (collapsed by default) -->
         <button class="tset-toggle" onclick="toggleTimerSettings()">
-          <span class="tset-toggle-arrow" id="tset-arrow">›</span> Round Settings
+          <span class="tset-toggle-arrow" id="tset-arrow">›</span> Custom Settings
         </button>
         <div class="timer-settings-wrap collapsed" id="tset-wrap">
           <div class="timer-settings">
@@ -517,7 +613,7 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px
             <div class="tset-item"><input class="tset-input" type="number" id="tset-fwork" value="30" min="10" max="120"/> sec work</div>
             <div class="tset-item"><input class="tset-input" type="number" id="tset-frest" value="10" min="0" max="60"/> sec rest</div>
             <div class="tset-item"><input class="tset-input" type="number" id="tset-frounds" value="3" min="1" max="6"/> rounds</div>
-            <button class="btn btn-secondary btn-sm" onclick="applyTimerSettings()" style="margin-left:auto">Apply</button>
+            <button class="btn btn-secondary btn-sm" onclick="applyTimerSettings();clearPresetActive()" style="margin-left:auto">Apply Custom</button>
           </div>
         </div>
       </div>
@@ -593,6 +689,35 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px
       </div>
     </div>
 
+    <!-- Calendar Heat Map -->
+    <div class="cal-section">
+      <div class="cal-header">
+        <div class="cal-month-title" id="cal-month-title">April 2026</div>
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="prevCalMonth()">‹</button>
+          <button class="cal-nav-btn" onclick="nextCalMonth()">›</button>
+        </div>
+      </div>
+      <div class="cal-body">
+        <div class="cal-weekdays">
+          <div class="cal-wd">Sun</div><div class="cal-wd">Mon</div><div class="cal-wd">Tue</div>
+          <div class="cal-wd">Wed</div><div class="cal-wd">Thu</div><div class="cal-wd">Fri</div><div class="cal-wd">Sat</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="cal-dot cycling"></div>Cycling</div>
+        <div class="cal-legend-item"><div class="cal-dot strength"></div>Strength</div>
+        <div class="cal-legend-item"><div class="cal-dot boxing"></div>Boxing</div>
+      </div>
+    </div>
+
+    <!-- Body Weight Log -->
+    <div class="bw-section">
+      <div class="bw-hdr">Body Weight</div>
+      <div class="bw-body" id="bw-body"><!-- rendered by JS --></div>
+    </div>
+
     <div class="bottom-row">
       <div class="panel">
         <div class="panel-hdr" onclick="togglePanel('ach')">
@@ -605,11 +730,20 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px
       </div>
       <div class="panel">
         <div class="panel-hdr" onclick="togglePanel('hist')">
-          <div class="panel-title">History</div>
+          <div class="panel-title">Cycling History</div>
           <span class="chev" id="hist-chev">▼</span>
         </div>
         <div class="panel-body hidden" id="hist-body">
           <div class="scroll-area" id="hist-list"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr" onclick="togglePanel('bxhist')">
+          <div class="panel-title">Boxing History</div>
+          <span class="chev" id="bxhist-chev">▼</span>
+        </div>
+        <div class="panel-body hidden" id="bxhist-body">
+          <div class="scroll-area" id="bxhist-list"></div>
         </div>
       </div>
     </div>
@@ -648,6 +782,21 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px
 </div>
 
 <div class="toasts" id="toasts"></div>
+
+<!-- ── REST TIMER BAR ─────────────────────────────────────────────── -->
+<div id="rest-timer-bar">
+  <div class="rest-bar-label">Rest</div>
+  <div class="rest-bar-countdown" id="rest-countdown">1:30</div>
+  <div class="rest-bar-track"><div class="rest-bar-fill" id="rest-bar-fill" style="width:0%"></div></div>
+  <div class="rest-dur-btns">
+    <button class="rest-dur-btn" data-dur="45" onclick="setRestDuration(45)">45s</button>
+    <button class="rest-dur-btn" data-dur="60" onclick="setRestDuration(60)">60s</button>
+    <button class="rest-dur-btn active" data-dur="90" onclick="setRestDuration(90)">90s</button>
+    <button class="rest-dur-btn" data-dur="120" onclick="setRestDuration(120)">2m</button>
+    <button class="rest-dur-btn" data-dur="180" onclick="setRestDuration(180)">3m</button>
+  </div>
+  <button class="rest-bar-skip" onclick="skipRest()">Skip ›</button>
+</div>
 
 <script>
 // ── Boxing Data ───────────────────────────────────────────────────────────────
@@ -756,7 +905,7 @@ const STRENGTH=[
   ]},
 ];
 
-const K={hist:'cw-history',ach:'cw-ach',timers:'cw-timers',week:'cw-week',strlog:'cw-str-log',strhist:'cw-str-hist'};
+const K={hist:'cw-history',ach:'cw-ach',timers:'cw-timers',week:'cw-week',strlog:'cw-str-log',strhist:'cw-str-hist',bodylog:'cw-body-log',bxhist:'cw-bx-hist'};
 const WORKOUT_DATA={
   phases:[
     {range:[1,13],name:"Foundation",focus:"Building aerobic base and pedal stroke efficiency."},
@@ -795,10 +944,12 @@ const WORKOUT_DATA={
 let S={
   week:1,activeDay:'day1',activeBoxingDay:'day1',activeStrengthWorkout:0,activeWorkoutTab:'cycling',
   history:{},achievements:[],timerUses:{done:0},
-  panels:{ach:false,hist:false},modalRpe:0,
+  panels:{ach:false,hist:false,bxhist:false},modalRpe:0,
   strLog:{},strHistory:[],
-  strLogWeight:60,strLogReps:5,strLogExIdx:0,
+  strLogWeight:135,strLogReps:5,strLogExIdx:0,
   strAnalyticsOpen:false,
+  bodyLog:[],
+  bxHistory:[],
 };
 
 // Boxing timer
@@ -821,6 +972,8 @@ function loadState(){
   }catch{S.achievements=ACH_DEFS.map(d=>({...d,earned:false,earnedAt:null}));}
   try{S.strLog=JSON.parse(localStorage.getItem(K.strlog)||'{}');}catch{}
   try{S.strHistory=JSON.parse(localStorage.getItem(K.strhist)||'[]');}catch{}
+  try{S.bodyLog=JSON.parse(localStorage.getItem(K.bodylog)||'[]');}catch{}
+  try{S.bxHistory=JSON.parse(localStorage.getItem(K.bxhist)||'[]');}catch{}
 }
 function saveState(){
   try{
@@ -830,6 +983,8 @@ function saveState(){
     localStorage.setItem(K.week,String(S.week));
     localStorage.setItem(K.strlog,JSON.stringify(S.strLog));
     localStorage.setItem(K.strhist,JSON.stringify(S.strHistory));
+    localStorage.setItem(K.bodylog,JSON.stringify(S.bodyLog));
+    localStorage.setItem(K.bxhist,JSON.stringify(S.bxHistory));
   }catch{}
 }
 
@@ -978,6 +1133,10 @@ function timerTick(){
       clearInterval(BT.iv);BT.iv=null;BT.running=false;
       BT.secsLeft=0;BT.completedCount++;
       S.timerUses.done=(S.timerUses.done||0)+1;
+      // Auto-log boxing session
+      const bxDone=getBoxing(S.week,S.activeBoxingDay);
+      S.bxHistory.push({date:strTodayKey(),workoutId:bxDone.id,title:bxDone.title,week:S.week,day:S.activeBoxingDay,ts:Date.now()});
+      if(S.bxHistory.length>100)S.bxHistory=S.bxHistory.slice(-100);
       const unlocked=evaluateAchievements();saveState();
       updateTimerUI(true);updateFsUI(true);
       renderStations(getBoxing(S.week,S.activeBoxingDay),true);
@@ -1204,7 +1363,7 @@ function render(){
   const ag=document.getElementById('ach-grid');ag.innerHTML='';
   S.achievements.forEach(a=>{const el=document.createElement('div');el.className='ach-item'+(a.earned?' earned':'');el.title=a.requirement;el.innerHTML=`<div class="ach-icon">${a.icon}</div><div><div class="ach-name">${a.title}</div><div class="ach-req">${a.requirement}</div></div>`;ag.appendChild(el);});
 
-  // History
+  // Cycling History
   const hl=document.getElementById('hist-list');hl.innerHTML='';
   const weeks=Object.keys(S.history).map(Number).sort((a,b)=>b-a);
   if(!weeks.length){hl.innerHTML='<div class="dim-txt" style="padding:16px;text-align:center">No workouts logged yet</div>';}
@@ -1216,12 +1375,17 @@ function render(){
     row.innerHTML=`<div class="hist-week">Wk ${wk}</div><div style="display:flex;gap:5px">${days.map(d=>`<div class="hist-day-pill">${DAY_LABELS[d]}</div>`).join('')}</div>${avgRpe?`<div class="hist-rpe">RPE ${avgRpe}</div>`:''}`;
     hl.appendChild(row);
   });
+
+  // Calendar, body weight, boxing history
+  renderCalendar();
+  renderBodyWeight();
+  renderBxHistory();
 }
 
 function renderStations(bx,allDone=false){
   const el=document.getElementById('stations-list');if(!el)return;
   const ph=BT.phases[BT.phaseIdx];const currentKey=ph?.stKey;
-  const sd=[{key:'s1',label:'Station 1',cls:'lbl-s1',text:bx.station1},{key:'s2',label:'Station 2',cls:'lbl-s2',text:bx.station2},{key:'s3',label:'Station 3',cls:'lbl-s3',text:bx.station3},{key:'fin',label:'🔥 Finisher',cls:'lbl-fin',text:bx.finisher}];
+  const sd=[{key:'s1',label:'Station 1',cls:'lbl-s1',text:bx.station1},{key:'s2',label:'Station 2',cls:'lbl-s2',text:bx.station2},{key:'s3',label:'Station 3',cls:'lbl-s3',text:bx.station3},{key:'fin',label:'Finisher',cls:'lbl-fin',text:bx.finisher}];
   el.innerHTML='';
   sd.forEach(st=>{const isCur=!allDone&&currentKey===st.key&&BT.running;const card=document.createElement('div');card.className='station-card'+(isCur?' current':'');card.dataset.key=st.key;card.innerHTML=`<div class="station-label ${st.cls}">${st.label}</div><div class="station-text">${st.text}</div>`;el.appendChild(card);});
 }
@@ -1295,7 +1459,7 @@ function renderStrength(){
       const s=sets[si];const done=!!s;
       return`<div class="str-set-chip${done?' done':''}" onclick="${done?`unlogSet(${wIdx},${i},${si})`:`openLogDrawer(${i})`}">
         <span class="str-set-chip-chk">${done?'✓':''}</span>
-        <span>${done?`${s.weight}kg × ${s.reps}`:`Set ${si+1}`}</span>
+        <span>${done?`${s.weight}lbs × ${s.reps}`:`Set ${si+1}`}</span>
       </div>`;
     }).join('');
     return`<div class="str-lift-item">
@@ -1335,6 +1499,21 @@ function updateDrawerUI(){
   document.getElementById('str-drawer-ex-name').textContent=e.name.toUpperCase();
   document.getElementById('log-weight').textContent=S.strLogWeight%1?S.strLogWeight.toFixed(1):S.strLogWeight;
   document.getElementById('log-reps').textContent=S.strLogReps;
+  // Progressive overload hint
+  const hint=document.getElementById('overload-hint');
+  if(hint){
+    const prev=strPrevWeight(S.activeStrengthWorkout,S.strLogExIdx);
+    if(prev){
+      const targetReps=parseInt(e.reps)||8;
+      const hitReps=prev.reps>=targetReps;
+      const suggested=hitReps?+(prev.weight+2.5).toFixed(1):prev.weight;
+      const nudge=hitReps?`<strong>Try ${suggested}lbs today</strong>`:`<strong>Stick at ${suggested}lbs</strong>`;
+      hint.innerHTML=`Last session: <strong>${prev.weight}lbs × ${prev.reps}</strong> — ${nudge}`;
+      hint.style.display='block';
+    } else {
+      hint.style.display='none';
+    }
+  }
   // Picker pills
   const picker=document.getElementById('str-drawer-ex-picker');
   if(picker) picker.innerHTML=wo.exercises.map((ex,i)=>`
@@ -1365,7 +1544,11 @@ function confirmLogSet(){
   if(!S.strLog[today][wIdx][eIdx]) S.strLog[today][wIdx][eIdx]=[];
   S.strLog[today][wIdx][eIdx].push({weight:S.strLogWeight,reps:S.strLogReps,ts:Date.now()});
   saveState();closeLogDrawer();renderStrength();
-  showToast('','Set Logged',`${S.strLogWeight}kg × ${S.strLogReps}`);
+  // Parse rest time from exercise definition (e.g. "90s", "75s", "60s", "45s")
+  const exRest=STRENGTH[wIdx].exercises[eIdx]?.rest||'';
+  const parsedSecs=parseRestStr(exRest);
+  startRestTimer(parsedSecs||RT.duration);
+  showToast('','Set Logged',`${S.strLogWeight}lbs × ${S.strLogReps} · Rest ${parsedSecs||RT.duration}s`);
 }
 function completeStrengthWorkout(){
   const wIdx=S.activeStrengthWorkout;
@@ -1414,12 +1597,12 @@ function renderStrengthAnalytics(){
     const canvasId=`str-ex-chart-${i}`;
     const lastAvg=hist.length?hist[hist.length-1].avg:null;
     const trend=hist.length>1?(hist[hist.length-1].avg-hist[hist.length-2].avg):0;
-    const trendHtml=hist.length>1?`<span style="color:${trend>=0?'var(--lime)':'var(--red)'};font-size:10px;font-weight:700">${trend>=0?'▲':'▼'} ${Math.abs(trend).toFixed(1)}kg</span>`:'';
+    const trendHtml=hist.length>1?`<span style="color:${trend>=0?'var(--lime)':'var(--red)'};font-size:10px;font-weight:700">${trend>=0?'▲':'▼'} ${Math.abs(trend).toFixed(1)}lbs</span>`:'';
     return`<div class="str-chart-card">
       <div class="str-chart-header">
         <div class="str-chart-title">${e.name.toUpperCase()}</div>
         <div style="display:flex;align-items:center;gap:8px">
-          ${lastAvg?`<span style="font-size:13px;font-weight:900;color:var(--lime)">${lastAvg}kg</span>`:''}
+          ${lastAvg?`<span style="font-size:13px;font-weight:900;color:var(--lime)">${lastAvg}lbs</span>`:''}
           ${trendHtml}
         </div>
       </div>
@@ -1507,6 +1690,189 @@ function drawStrChart(canvasId,data,labels){
     if(l) ctx.fillText(l,pts[i].x,H-4);
   });
 }
+// ── Progressive Overload Helper ───────────────────────────────────────────────
+function strPrevWeight(wIdx,eIdx){
+  const today=strTodayKey();
+  const dates=Object.keys(S.strLog).filter(d=>d!==today).sort().reverse();
+  for(const date of dates){
+    const sets=S.strLog[date]?.[wIdx]?.[eIdx];
+    if(sets&&sets.length){
+      const avgW=sets.reduce((s,x)=>s+x.weight,0)/sets.length;
+      const avgR=sets.reduce((s,x)=>s+x.reps,0)/sets.length;
+      return{weight:+avgW.toFixed(1),reps:Math.round(avgR),sets:sets.length,date};
+    }
+  }
+  return null;
+}
+
+// ── Rest Timer ────────────────────────────────────────────────────────────────
+let RT={active:false,secsLeft:0,duration:90,totalSecs:90,iv:null};
+
+// Parse "90s" / "75s" / "2min" etc. → seconds
+function parseRestStr(str){
+  if(!str)return null;
+  const s=str.toLowerCase().replace(/\s/g,'');
+  const minMatch=s.match(/(\d+\.?\d*)min/);if(minMatch)return Math.round(parseFloat(minMatch[1])*60);
+  const secMatch=s.match(/(\d+\.?\d*)s/);if(secMatch)return Math.round(parseFloat(secMatch[1]));
+  const numOnly=parseInt(s);if(!isNaN(numOnly))return numOnly;
+  return null;
+}
+
+function syncRestDurButtons(secs){
+  document.querySelectorAll('.rest-dur-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.dur)===secs));
+}
+function startRestTimer(secs){
+  clearRestTimer();
+  RT.active=true;
+  RT.secsLeft=secs||RT.duration;
+  RT.totalSecs=RT.secsLeft;
+  syncRestDurButtons(RT.secsLeft);
+  updateRestBar();
+  document.getElementById('rest-timer-bar').classList.add('show');
+  RT.iv=setInterval(restTimerTick,1000);
+}
+function restTimerTick(){
+  RT.secsLeft--;
+  if(RT.secsLeft<=0){
+    clearRestTimer();
+    bell(2);
+    document.getElementById('rest-timer-bar').classList.remove('show');
+    showToast('','Rest Complete','Time for your next set!');
+    return;
+  }
+  updateRestBar();
+}
+function updateRestBar(){
+  const m=Math.floor(RT.secsLeft/60),s=RT.secsLeft%60;
+  document.getElementById('rest-countdown').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+  const pct=(1-RT.secsLeft/RT.totalSecs)*100;
+  document.getElementById('rest-bar-fill').style.width=pct+'%';
+}
+function skipRest(){
+  clearRestTimer();
+  document.getElementById('rest-timer-bar').classList.remove('show');
+}
+function clearRestTimer(){
+  if(RT.iv){clearInterval(RT.iv);RT.iv=null;}
+  RT.active=false;
+}
+function setRestDuration(secs){
+  RT.duration=secs;
+  syncRestDurButtons(secs);
+  // If rest timer is currently active, restart with new duration
+  if(RT.active)startRestTimer(secs);
+}
+
+// ── Calendar Heat Map ─────────────────────────────────────────────────────────
+let calState={year:new Date().getFullYear(),month:new Date().getMonth()};
+const MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function prevCalMonth(){calState.month--;if(calState.month<0){calState.month=11;calState.year--;}renderCalendar();}
+function nextCalMonth(){calState.month++;if(calState.month>11){calState.month=0;calState.year++;}renderCalendar();}
+
+function renderCalendar(){
+  const cg=document.getElementById('cal-grid');
+  const ct=document.getElementById('cal-month-title');
+  if(!cg||!ct)return;
+  const{year,month}=calState;
+  ct.textContent=`${MONTH_NAMES[month]} ${year}`;
+  // Build activity map: dateString → Set of types
+  const act={};
+  const add=(ds,type)=>{if(!act[ds])act[ds]=new Set();act[ds].add(type);};
+  // Cycling — use completedAt timestamps
+  Object.values(S.history).forEach(wh=>{
+    Object.values(wh.days||{}).forEach(d=>{
+      if(d.completedAt)add(new Date(d.completedAt).toDateString(),'cycling');
+    });
+  });
+  // Strength — date strings stored in strHistory
+  (S.strHistory||[]).forEach(h=>add(h.date,'strength'));
+  // Boxing — date strings stored in bxHistory
+  (S.bxHistory||[]).forEach(h=>add(h.date,'boxing'));
+  // Build grid
+  const firstDow=new Date(year,month,1).getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const todayStr=new Date().toDateString();
+  let html='';
+  for(let i=0;i<firstDow;i++)html+='<div class="cal-day"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=new Date(year,month,d).toDateString();
+    const types=act[ds]?[...act[ds]]:[];
+    const isToday=ds===todayStr;
+    const dots=types.map(t=>`<div class="cal-dot ${t}"></div>`).join('');
+    html+=`<div class="cal-day${isToday?' today':''}${types.length?' active':''}">
+      ${d}${dots?`<div class="cal-dots">${dots}</div>`:''}
+    </div>`;
+  }
+  cg.innerHTML=html;
+}
+
+// ── Body Weight Log ───────────────────────────────────────────────────────────
+function saveBodyWeight(){
+  const inp=document.getElementById('bw-input');
+  const val=parseFloat(inp.value);
+  if(!val||val<50||val>600){showToast('','Invalid','Enter a weight between 50–600 lbs');return;}
+  const today=strTodayKey();
+  S.bodyLog=S.bodyLog.filter(e=>e.date!==today);
+  S.bodyLog.push({date:today,weight:val});
+  if(S.bodyLog.length>90)S.bodyLog=S.bodyLog.slice(-90);
+  saveState();renderBodyWeight();
+  showToast('','Weight Saved',`${val} lbs`);
+}
+function renderBodyWeight(){
+  const container=document.getElementById('bw-body');
+  if(!container)return;
+  const today=strTodayKey();
+  const todayEntry=S.bodyLog.find(e=>e.date===today);
+  const recent=S.bodyLog.slice().reverse().slice(0,10);
+  container.innerHTML=`
+    <div class="bw-row">
+      <input class="bw-input" type="number" id="bw-input" placeholder="185" step="0.5" min="50" max="600"
+        value="${todayEntry?todayEntry.weight:''}"/>
+      <span class="bw-unit">lbs</span>
+      <button class="bw-save-btn" onclick="saveBodyWeight()">Save</button>
+      ${todayEntry?`<span style="font-size:11px;color:var(--dim)">Today: <strong style="color:var(--lime)">${todayEntry.weight}</strong></span>`:''}
+    </div>
+    ${recent.length?`<div class="bw-history">${recent.map(e=>`<div class="bw-hist-chip"><div class="bw-hist-date">${e.date.split(' ').slice(1,3).join(' ')}</div><div class="bw-hist-val">${e.weight}</div></div>`).join('')}</div>`:'<div class="dim-txt">No entries yet — log your first weight above</div>'}`;
+}
+
+// ── Boxing History Render ─────────────────────────────────────────────────────
+function renderBxHistory(){
+  const el=document.getElementById('bxhist-list');
+  if(!el)return;
+  const hist=S.bxHistory.slice().reverse().slice(0,30);
+  if(!hist.length){el.innerHTML='<div class="dim-txt" style="padding:12px 0">No boxing sessions logged yet</div>';return;}
+  el.innerHTML=hist.map(h=>`<div class="bx-log-row">
+    <div class="bx-log-date">${h.date.split(' ').slice(1,3).join(' ')}</div>
+    <div class="bx-log-title">${h.title}</div>
+    <div class="bx-log-pill">Wk ${h.week}</div>
+  </div>`).join('');
+}
+
+// ── Boxing Presets ────────────────────────────────────────────────────────────
+const BX_PRESETS={
+  quick: {workMins:1,restSecs:30,rounds:2,fWorkSecs:20,fRestSecs:10,fRounds:2},
+  standard:{workMins:2,restSecs:45,rounds:3,fWorkSecs:30,fRestSecs:10,fRounds:3},
+  hard:  {workMins:3,restSecs:30,rounds:4,fWorkSecs:45,fRestSecs:10,fRounds:3},
+};
+function applyBoxingPreset(name){
+  const p=BX_PRESETS[name];if(!p)return;
+  // Update inputs
+  document.getElementById('tset-work').value=p.workMins;
+  document.getElementById('tset-rest').value=p.restSecs;
+  document.getElementById('tset-rounds').value=p.rounds;
+  document.getElementById('tset-fwork').value=p.fWorkSecs;
+  document.getElementById('tset-frest').value=p.fRestSecs;
+  document.getElementById('tset-frounds').value=p.fRounds;
+  // Apply to BT
+  applyTimerSettings();
+  // Highlight active preset
+  document.querySelectorAll('.bx-preset-btn').forEach(b=>b.classList.toggle('active',b.dataset.preset===name));
+}
+function clearPresetActive(){
+  document.querySelectorAll('.bx-preset-btn').forEach(b=>b.classList.remove('active'));
+}
+
 function toggleTimerSettings(){
   const wrap=document.getElementById('tset-wrap');
   const arrow=document.getElementById('tset-arrow');
@@ -1602,7 +1968,8 @@ function confirmReset(){
   if(confirm('Reset ALL workout data? This cannot be undone.')){
     S.history={};S.timerUses={done:0};S.week=1;S.activeDay='day1';
     S.achievements=ACH_DEFS.map(d=>({...d,earned:false,earnedAt:null}));
-    [K.hist,K.ach,K.timers].forEach(k=>localStorage.removeItem(k));
+    S.strLog={};S.strHistory=[];S.bodyLog=[];S.bxHistory=[];
+    [K.hist,K.ach,K.timers,K.strlog,K.strhist,K.bodylog,K.bxhist].forEach(k=>localStorage.removeItem(k));
     localStorage.setItem(K.week,'1');stopTimer();resetBoxingTimer();render();
     showToast('','Data reset','Starting fresh!');
   }
@@ -1620,13 +1987,15 @@ render();resetBoxingTimer();
   <div class="str-drawer-handle"></div>
   <div class="str-drawer-ex-lbl">EXERCISE</div>
   <div class="str-drawer-ex-name" id="str-drawer-ex-name">BARBELL BENCH PRESS</div>
+  <!-- Progressive overload hint -->
+  <div class="overload-hint" id="overload-hint" style="display:none"></div>
   <!-- Exercise switcher pills -->
   <div class="str-drawer-ex-picker" id="str-drawer-ex-picker"></div>
   <!-- Weight / Reps inputs -->
   <div class="str-drawer-inputs">
     <div class="str-input-grp">
-      <div class="str-input-lbl">WEIGHT (KG)</div>
-      <div class="str-input-val" id="log-weight">60</div>
+      <div class="str-input-lbl">WEIGHT (LBS)</div>
+      <div class="str-input-val" id="log-weight">135</div>
       <div class="str-input-btns">
         <button class="str-input-btn" onclick="adjustLog('weight',-2.5)">−</button>
         <button class="str-input-btn" onclick="adjustLog('weight',2.5)">+</button>
