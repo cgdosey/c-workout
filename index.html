@@ -82,11 +82,15 @@ html,body{background:var(--bg);color:var(--text);font-family:-apple-system,Blink
 .workout-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--r);overflow:hidden;transition:all .2s}
 .workout-card:hover{border-color:rgba(204,255,0,.25);box-shadow:0 4px 20px rgba(0,0,0,.3)}
 .workout-card.logged{border-color:rgba(204,255,0,.3);box-shadow:0 0 12px rgba(204,255,0,.08)}
-.wcard-thumb{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden;display:block;text-decoration:none}
+.wcard-thumb{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden;cursor:pointer}
 .wcard-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:filter .2s}
-.workout-card:hover .wcard-thumb img{filter:brightness(.7)}
+.wcard-thumb:hover img{filter:brightness(.7)}
 .wcard-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .wcard-play svg{width:36px;height:36px;fill:rgba(255,255,255,.9);filter:drop-shadow(0 2px 8px rgba(0,0,0,.8))}
+.wcard-player{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden}
+.wcard-player iframe{width:100%;height:100%;display:block;border:none}
+.wcard-close-vid{position:absolute;top:8px;right:8px;z-index:10;background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.2);color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:background .15s;line-height:1;flex-shrink:0}
+.wcard-close-vid:hover{background:rgba(0,0,0,.95)}
 .wcard-day-badge{padding:11px 13px 6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim)}
 .wcard-done-badge{position:absolute;top:8px;right:8px;background:rgba(204,255,0,.15);border:1px solid rgba(204,255,0,.3);border-radius:6px;padding:3px 7px;font-size:10px;font-weight:700;color:var(--lime)}
 .wcard-body{padding:12px}
@@ -1528,17 +1532,17 @@ function render(){
     card.className='workout-card'+(log?' logged':'');
     card.innerHTML=`
       <div class="wcard-day-badge">${DAY_LABELS[day]} — ${DAY_TYPE[day]}</div>
-      <a class="wcard-thumb" href="${ytUrl}" target="_blank" rel="noopener">
+      <div class="wcard-thumb" onclick="openInlineVideo(this,'${vid.id}')">
         <img src="${thumb}" alt="${vid.title}" onerror="this.style.background='var(--surface2)'"/>
         <div class="wcard-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
         ${log?'<div class="wcard-done-badge">✓ Done</div>':''}
-      </a>
+      </div>
       <div class="wcard-body">
         <div class="wcard-title">${vid.title}</div>
         <div class="wcard-sub">⏱ ${vid.duration} · ${phase.name}</div>
         <div class="wcard-footer">
           <button class="wcard-log-btn${log?' edit':''}" onclick="openModal('${day}')">${log?'Edit Log':'+ Log Workout'}</button>
-          <a class="wcard-yt" href="${ytUrl}" target="_blank" rel="noopener" title="Watch on YouTube"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></a>
+          <a class="wcard-yt" href="${ytUrl}" target="_blank" rel="noopener" title="Open in YouTube"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></a>
         </div>
       </div>`;
     grid.appendChild(card);
@@ -1588,6 +1592,35 @@ function renderStations(bx,allDone=false){
   sd.forEach(st=>{const isCur=!allDone&&currentKey===st.key&&BT.running;const card=document.createElement('div');card.className='station-card'+(isCur?' current':'');card.dataset.key=st.key;card.innerHTML=`<div class="station-label ${st.cls}">${st.label}</div><div class="station-text">${st.text}</div>`;el.appendChild(card);});
 }
 
+
+// ── Inline Video Player ───────────────────────────────────────────────────────
+function openInlineVideo(thumbEl, videoId){
+  // Close any other open players first
+  document.querySelectorAll('.wcard-player').forEach(p=>p.remove());
+  document.querySelectorAll('.wcard-thumb[data-playing]').forEach(t=>{
+    t.style.display='';delete t.dataset.playing;
+  });
+  // Hide the thumbnail and insert player above it
+  thumbEl.style.display='none';
+  thumbEl.dataset.playing='1';
+  const player=document.createElement('div');
+  player.className='wcard-player';
+  player.innerHTML=`
+    <button class="wcard-close-vid" onclick="closeInlineVideo(this)" title="Close">✕</button>
+    <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1"
+      allow="autoplay;encrypted-media;picture-in-picture" allowfullscreen></iframe>`;
+  thumbEl.parentNode.insertBefore(player,thumbEl);
+  // Scroll the card into view smoothly
+  player.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeInlineVideo(btn){
+  const player=btn.closest('.wcard-player');
+  const thumb=player.nextElementSibling;
+  if(thumb&&thumb.classList.contains('wcard-thumb')){
+    thumb.style.display='';delete thumb.dataset.playing;
+  }
+  player.remove();
+}
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 function changeWeek(dir){const nw=S.week+dir;if(nw<1||nw>52)return;stopTimer();S.week=nw;summaryWeek=null;saveState();resetBoxingTimer();render();}
