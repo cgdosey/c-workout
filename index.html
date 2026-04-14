@@ -767,17 +767,21 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px
       <button class="btn-icon" onclick="closeHistoryModal()" style="width:30px;height:30px;font-size:14px">✕</button>
     </div>
     <div class="modal-body">
-      <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:12px">What did you do?</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px" id="hist-type-btns">
-        <button class="str-wbtn" id="hist-btn-cycling" onclick="selectHistType('cycling')"><div class="str-wbtn-title" style="font-size:12px">Cycling</div></button>
-        <button class="str-wbtn" id="hist-btn-boxing"  onclick="selectHistType('boxing')"><div class="str-wbtn-title" style="font-size:12px">Boxing</div></button>
-        <button class="str-wbtn" id="hist-btn-strength" onclick="selectHistType('strength')"><div class="str-wbtn-title" style="font-size:12px">Strength</div></button>
+      <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:14px">What did you do?</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+        <button class="str-wbtn" onclick="logHistSession('cycling')">
+          <div class="str-wbtn-title" style="font-size:13px">Cycling</div>
+        </button>
+        <button class="str-wbtn" onclick="logHistSession('boxing')">
+          <div class="str-wbtn-title" style="font-size:13px">Boxing</div>
+        </button>
+        <button class="str-wbtn" onclick="logHistSession('strength')">
+          <div class="str-wbtn-title" style="font-size:13px">Strength</div>
+        </button>
       </div>
-      <div id="hist-type-form" style="display:none"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeHistoryModal()">Cancel</button>
-      <button class="btn btn-primary" id="hist-save-btn" onclick="saveHistoryLog()" style="opacity:.4;pointer-events:none">Save</button>
     </div>
   </div>
 </div>
@@ -936,7 +940,7 @@ const STRENGTH=[
   ]},
 ];
 
-const K={hist:'cw-history',ach:'cw-ach',timers:'cw-timers',week:'cw-week',strlog:'cw-str-log',strhist:'cw-str-hist',bodylog:'cw-body-log',bxhist:'cw-bx-hist'};
+const K={hist:'cw-history',ach:'cw-ach',timers:'cw-timers',week:'cw-week',strlog:'cw-str-log',strhist:'cw-str-hist',bodylog:'cw-body-log',bxhist:'cw-bx-hist',actlog:'cw-act-log'};
 const WORKOUT_DATA={
   phases:[
     {range:[1,13],name:"Foundation",focus:"Building aerobic base and pedal stroke efficiency."},
@@ -981,6 +985,7 @@ let S={
   strAnalyticsOpen:false,
   bodyLog:[],
   bxHistory:[],
+  activityLog:[],
 };
 
 // Boxing timer
@@ -1005,6 +1010,7 @@ function loadState(){
   try{S.strHistory=JSON.parse(localStorage.getItem(K.strhist)||'[]');}catch{}
   try{S.bodyLog=JSON.parse(localStorage.getItem(K.bodylog)||'[]');}catch{}
   try{S.bxHistory=JSON.parse(localStorage.getItem(K.bxhist)||'[]');}catch{}
+  try{S.activityLog=JSON.parse(localStorage.getItem(K.actlog)||'[]');}catch{}
 }
 function saveState(){
   try{
@@ -1016,6 +1022,7 @@ function saveState(){
     localStorage.setItem(K.strhist,JSON.stringify(S.strHistory));
     localStorage.setItem(K.bodylog,JSON.stringify(S.bodyLog));
     localStorage.setItem(K.bxhist,JSON.stringify(S.bxHistory));
+    localStorage.setItem(K.actlog,JSON.stringify(S.activityLog||[]));
   }catch{}
 }
 
@@ -1810,12 +1817,14 @@ function renderCalendar(){
   // Build activity map: dateString → Set of types
   const act={};
   const add=(ds,type)=>{if(!act[ds])act[ds]=new Set();act[ds].add(type);};
-  // Cycling — use completedAt timestamps
+  // Cycling — from completedAt timestamps in history
   Object.values(S.history).forEach(wh=>{
     Object.values(wh.days||{}).forEach(d=>{
       if(d.completedAt)add(new Date(d.completedAt).toDateString(),'cycling');
     });
   });
+  // Cycling — from backdated activityLog
+  (S.activityLog||[]).filter(e=>e.type==='cycling').forEach(e=>add(e.date,'cycling'));
   // Strength — date strings stored in strHistory
   (S.strHistory||[]).forEach(h=>add(h.date,'strength'));
   // Boxing — date strings stored in bxHistory
@@ -1957,19 +1966,13 @@ function renderBxHistory(){
 }
 
 // ── Historical Log Modal ──────────────────────────────────────────────────────
-let HLS={date:null,type:null,rpe:0};
+let histDate=null;
 const HIST_MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function openHistoryModal(dateStr){
+  histDate=dateStr;
   const d=new Date(dateStr);
-  HLS={date:dateStr,type:null,rpe:0};
   document.getElementById('hist-log-title').textContent=`${HIST_MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
-  // Reset
-  document.querySelectorAll('#hist-type-btns .str-wbtn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('hist-type-form').style.display='none';
-  document.getElementById('hist-type-form').innerHTML='';
-  const sb=document.getElementById('hist-save-btn');
-  sb.style.opacity='.4';sb.style.pointerEvents='none';
   document.getElementById('hist-log-modal').classList.add('open');
   document.body.style.overflow='hidden';
 }
@@ -1977,66 +1980,27 @@ function closeHistoryModal(){
   document.getElementById('hist-log-modal').classList.remove('open');
   document.body.style.overflow='';
 }
-function selectHistType(type){
-  HLS.type=type;HLS.rpe=0;
-  ['cycling','boxing','strength'].forEach(t=>{
-    document.getElementById('hist-btn-'+t).classList.toggle('active',t===type);
-  });
-  const sb=document.getElementById('hist-save-btn');
-  sb.style.opacity='1';sb.style.pointerEvents='auto';
-  const form=document.getElementById('hist-type-form');
-  form.style.display='block';
+function logHistSession(type){
+  if(!histDate)return;
+  const ts=new Date(histDate).getTime();
   if(type==='cycling'){
-    form.innerHTML=`
-      <div class="fg"><label class="flbl">Week Number</label>
-        <input class="finput" type="number" id="hist-week" placeholder="1 – 52" min="1" max="52"/></div>
-      <div class="fg"><label class="flbl">Day</label>
-        <select class="finput" id="hist-day">
-          <option value="day1">Day 1 — HIIT</option>
-          <option value="day2">Day 2 — Endurance</option>
-          <option value="day3">Day 3 — Power</option>
-        </select></div>
-      <div class="fg" style="margin-bottom:0"><label class="flbl">RPE (optional)</label>
-        <div class="rpe-grid" id="hist-rpe-grid"></div></div>`;
-    const rg=document.getElementById('hist-rpe-grid');
-    for(let n=1;n<=10;n++){
-      const btn=document.createElement('button');btn.className='rpe-btn';btn.textContent=n;
-      btn.onclick=()=>{HLS.rpe=n;rg.querySelectorAll('.rpe-btn').forEach((b,i)=>b.classList.toggle('sel',i===n-1));};
-      rg.appendChild(btn);
-    }
+    // Store in activityLog — no week needed, just marks the date
+    if(!S.activityLog)S.activityLog=[];
+    S.activityLog=S.activityLog.filter(e=>!(e.date===histDate&&e.type==='cycling'));
+    S.activityLog.push({date:histDate,type:'cycling',ts});
   } else if(type==='boxing'){
-    form.innerHTML=`
-      <div class="fg" style="margin-bottom:0"><label class="flbl">Session Name (optional)</label>
-        <input class="finput" type="text" id="hist-bx-title" placeholder="e.g. The Sprawl Flow"/></div>`;
-  } else if(type==='strength'){
-    form.innerHTML=`
-      <div class="fg" style="margin-bottom:0"><label class="flbl">Workout</label>
-        <select class="finput" id="hist-str-wo">
-          ${STRENGTH.map((w,i)=>`<option value="${i}">${w.title}</option>`).join('')}
-        </select></div>`;
-  }
-}
-function saveHistoryLog(){
-  if(!HLS.type||!HLS.date)return;
-  const ts=new Date(HLS.date).getTime();
-  if(HLS.type==='cycling'){
-    const week=parseInt(document.getElementById('hist-week')?.value);
-    const day=document.getElementById('hist-day')?.value||'day1';
-    if(!week||week<1||week>52){showToast('','Invalid week','Enter 1–52');return;}
-    if(!S.history[week])S.history[week]={days:{}};
-    S.history[week].days[day]={rpe:HLS.rpe||0,hr:'',notes:'',completedAt:new Date(HLS.date).toISOString()};
-  } else if(HLS.type==='boxing'){
-    const title=document.getElementById('hist-bx-title')?.value.trim()||'Boxing Session';
-    S.bxHistory.push({date:HLS.date,workoutId:0,title,week:S.week,day:S.activeBoxingDay,ts});
+    S.bxHistory=S.bxHistory.filter(e=>e.date!==histDate);
+    S.bxHistory.push({date:histDate,workoutId:0,title:'Boxing Session',week:S.week,day:S.activeBoxingDay,ts,backdated:true});
     S.bxHistory.sort((a,b)=>new Date(a.date)-new Date(b.date));
-  } else if(HLS.type==='strength'){
-    const wIdx=parseInt(document.getElementById('hist-str-wo')?.value)||0;
-    S.strHistory.push({date:HLS.date,wIdx,title:STRENGTH[wIdx].title,totalSets:0,ts,backdated:true});
+  } else if(type==='strength'){
+    S.strHistory=S.strHistory.filter(e=>!(e.date===histDate&&e.backdated));
+    S.strHistory.push({date:histDate,wIdx:S.activeStrengthWorkout,title:STRENGTH[S.activeStrengthWorkout].title,totalSets:0,ts,backdated:true});
     S.strHistory.sort((a,b)=>new Date(a.date)-new Date(b.date));
   }
   evaluateAchievements();saveState();closeHistoryModal();
   renderCalendar();renderBxHistory();render();
-  showToast('','Logged',`${HLS.type.charAt(0).toUpperCase()+HLS.type.slice(1)} session added`);
+  const label=type.charAt(0).toUpperCase()+type.slice(1);
+  showToast('','Logged',`${label} session added`);
 }
 
 // ── Boxing Presets ────────────────────────────────────────────────────────────
