@@ -366,6 +366,28 @@ input[type="date"].finput{color-scheme:dark;cursor:pointer}
 .toast{background:#1e1e1e;border:1px solid rgba(204,255,0,.25);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 20px rgba(204,255,0,.08);animation:slideIn .3s ease}
 .toast-icon{font-size:20px}.toast-txt{font-size:13px;font-weight:700}.toast-sub{font-size:11px;color:var(--dim);margin-top:2px}
 @keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+/* ── GOAL TRACKER ────────────────────────────────── */
+.goal-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;margin-top:14px;overflow:hidden}
+.goal-card-hdr{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--glass-border)}
+.goal-card-title{font-size:10px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim)}
+.goal-card-hdr-right{display:flex;align-items:center;gap:8px}
+.goal-period-chip{font-size:10px;font-weight:800;color:var(--lime);letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:6px;background:rgba(204,255,0,.08);border:1px solid rgba(204,255,0,.2)}
+.goal-edit-btn{background:var(--surface2);border:1px solid var(--border);color:var(--dim);font-size:11px;font-weight:700;padding:5px 12px;border-radius:8px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.goal-edit-btn:hover,.goal-edit-btn.open{border-color:var(--lime);color:var(--lime);background:rgba(204,255,0,.06)}
+.goal-rings{display:flex;justify-content:space-around;align-items:center;padding:18px 8px 8px}
+.goal-ring-wrap{display:flex;flex-direction:column;align-items:center;gap:5px}
+.goal-ring-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--dim)}
+.goal-ring-done{font-size:9px;font-weight:800;color:var(--lime);letter-spacing:.5px;text-transform:uppercase}
+.goal-settings{padding:16px 18px 18px;border-top:1px solid var(--glass-border)}
+.goal-tog-row{display:flex;gap:6px;margin-bottom:12px}
+.goal-tog-btn{flex:1;padding:8px 0;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--dim);font-size:11px;font-weight:800;cursor:pointer;transition:all .15s;text-align:center;letter-spacing:.3px}
+.goal-tog-btn.on{background:rgba(204,255,0,.08);border-color:var(--lime);color:var(--lime)}
+.goal-inputs-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.goal-input-grp{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;min-width:52px}
+.goal-input-lbl{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim)}
+.goal-num{width:60px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 4px;color:var(--text);font-size:22px;font-weight:900;outline:none;text-align:center;font-family:inherit;transition:border-color .15s;-moz-appearance:textfield}
+.goal-num::-webkit-outer-spin-button,.goal-num::-webkit-inner-spin-button{-webkit-appearance:none}
+.goal-num:focus{border-color:var(--lime)}
 /* ── WEEKLY SUMMARY ──────────────────────────────── */
 .week-summary{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:18px 20px;margin-top:14px}
 .week-sum-hdr{font-size:10px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);margin-bottom:12px}
@@ -765,11 +787,41 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px
         <div class="prog-stat-lbl">Badges</div>
       </div>
       <div class="prog-stat-card">
-        <div class="prog-stat-val" id="prog-month">0%</div>
+        <div class="prog-stat-val" id="prog-month" style="font-size:26px">0%</div>
+        <div id="prog-month-fraction" style="font-size:9px;color:var(--dim);margin-top:2px;font-weight:700;letter-spacing:.5px">0 / 0 days</div>
         <div class="prog-stat-lbl">This Month</div>
         <div class="month-bar-track"><div class="month-bar-fill" id="prog-month-bar" style="width:0%"></div></div>
       </div>
     </div>
+    <!-- Goal Tracker -->
+    <div class="goal-card" id="goal-card">
+      <div class="goal-card-hdr">
+        <div class="goal-card-title">Session Goal</div>
+        <div class="goal-card-hdr-right">
+          <button class="cal-nav-btn" onclick="moveGoalView(-1)">‹</button>
+          <span class="goal-period-chip" id="goal-period-chip">Weekly</span>
+          <button class="cal-nav-btn" id="goal-nav-next" onclick="moveGoalView(1)">›</button>
+          <button class="goal-edit-btn" id="goal-edit-btn" onclick="toggleGoalSettings()">Edit</button>
+        </div>
+      </div>
+      <div id="goal-rings-area"><!-- rendered by JS --></div>
+      <div class="goal-settings" id="goal-settings" style="display:none">
+        <div style="font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px">Mode</div>
+        <div class="goal-tog-row" style="margin-bottom:16px">
+          <button class="goal-tog-btn" id="gtog-overall" onclick="setGoalMode('overall')">Overall</button>
+          <button class="goal-tog-btn" id="gtog-bytype" onclick="setGoalMode('bytype')">By Type</button>
+        </div>
+        <div style="font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px">Period</div>
+        <div class="goal-tog-row" style="margin-bottom:18px">
+          <button class="goal-tog-btn" id="gtog-weekly" onclick="setGoalPeriod('weekly')">Weekly</button>
+          <button class="goal-tog-btn" id="gtog-monthly" onclick="setGoalPeriod('monthly')">Monthly</button>
+        </div>
+        <div style="font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px">Target Sessions</div>
+        <div class="goal-inputs-row" id="goal-inputs-row"><!-- rendered by JS --></div>
+        <button onclick="saveGoals()" style="width:100%;padding:12px;background:var(--lime);color:#000;border:none;border-radius:12px;font-size:14px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer">Save Goal</button>
+      </div>
+    </div>
+
     <!-- Weekly Summary -->
     <div class="week-summary">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
@@ -1031,7 +1083,7 @@ const STRENGTH=[
   ]},
 ];
 
-const K={hist:'cw-history',ach:'cw-ach',timers:'cw-timers',week:'cw-week',strlog:'cw-str-log',strhist:'cw-str-hist',bodylog:'cw-body-log',bxhist:'cw-bx-hist',actlog:'cw-act-log',prs:'cw-prs'};
+const K={hist:'cw-history',ach:'cw-ach',timers:'cw-timers',week:'cw-week',strlog:'cw-str-log',strhist:'cw-str-hist',bodylog:'cw-body-log',bxhist:'cw-bx-hist',actlog:'cw-act-log',prs:'cw-prs',goals:'cw-goals'};
 const WORKOUT_DATA={
   phases:[
     {range:[1,13],name:"Foundation",focus:"Building aerobic base and pedal stroke efficiency."},
@@ -1078,6 +1130,7 @@ let S={
   bodyLog:[],
   bxHistory:[],
   activityLog:[],
+  goals:{mode:'overall',period:'weekly',overall:5,cycling:3,boxing:2,strength:2},
 };
 
 // Boxing timer
@@ -1104,6 +1157,7 @@ function loadState(){
   try{S.bxHistory=JSON.parse(localStorage.getItem(K.bxhist)||'[]');}catch{}
   try{S.activityLog=JSON.parse(localStorage.getItem(K.actlog)||'[]');}catch{}
   try{S.prs=JSON.parse(localStorage.getItem(K.prs)||'{}');}catch{}
+  try{const g=JSON.parse(localStorage.getItem(K.goals)||'{}');S.goals={...S.goals,...g};}catch{}
 }
 function saveState(){
   try{
@@ -1117,6 +1171,7 @@ function saveState(){
     localStorage.setItem(K.bxhist,JSON.stringify(S.bxHistory));
     localStorage.setItem(K.actlog,JSON.stringify(S.activityLog||[]));
     localStorage.setItem(K.prs,JSON.stringify(S.prs||{}));
+    localStorage.setItem(K.goals,JSON.stringify(S.goals));
   }catch{}
 }
 
@@ -1431,8 +1486,11 @@ function render(){
   if(pt) pt.textContent=total;
   if(ps) ps.textContent=dayStreak;
   if(pa) pa.textContent=earned;
-  const pm=document.getElementById('prog-month');const pmb=document.getElementById('prog-month-bar');
+  const pm=document.getElementById('prog-month');
+  const pmf=document.getElementById('prog-month-fraction');
+  const pmb=document.getElementById('prog-month-bar');
   if(pm) pm.textContent=mc.pct+'%';
+  if(pmf) pmf.textContent=`${mc.active} of ${mc.total} days`;
   if(pmb) pmb.style.width=mc.pct+'%';
 
   // Phase card
@@ -1513,9 +1571,10 @@ function render(){
   // Combined all-workouts history
   renderAllHistory();
 
-  // Calendar, body weight, weekly summary, PRs
+  // Calendar, body weight, goal card, weekly summary, PRs
   renderCalendar();
   renderBodyWeight();
+  renderGoalCard();
   renderWeeklySummary();
   renderPRBoard();
 }
@@ -1892,6 +1951,172 @@ function getMonthlyConsistency(){
   let active=0;
   for(let d=1;d<=today;d++)if(dates.has(new Date(now.getFullYear(),now.getMonth(),d).toDateString()))active++;
   return{active,total:today,pct:today>0?Math.round(active/today*100):0};
+}
+
+// ── Goal Tracker ──────────────────────────────────────────────────────────────
+let goalViewOffset=0; // 0=current, -1=previous period, etc.
+const GOAL_MON_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function getGoalPeriodRange(){
+  const now=new Date();
+  const off=goalViewOffset;
+  if(S.goals.period==='weekly'){
+    const dow=now.getDay();const diff=dow===0?6:dow-1;
+    const start=new Date(now);start.setDate(now.getDate()-diff+off*7);start.setHours(0,0,0,0);
+    const end=new Date(start);end.setDate(start.getDate()+7);
+    return{start,end};
+  } else {
+    const d=new Date(now.getFullYear(),now.getMonth()+off,1);
+    return{start:d,end:new Date(d.getFullYear(),d.getMonth()+1,1)};
+  }
+}
+function getGoalPeriodLabel(){
+  const{start,end}=getGoalPeriodRange();
+  if(S.goals.period==='weekly'){
+    if(goalViewOffset===0)return'This Week';
+    if(goalViewOffset===-1)return'Last Week';
+    const eDisp=new Date(end);eDisp.setDate(eDisp.getDate()-1);
+    return`${GOAL_MON_NAMES[start.getMonth()]} ${start.getDate()} – ${GOAL_MON_NAMES[eDisp.getMonth()]} ${eDisp.getDate()}`;
+  } else {
+    if(goalViewOffset===0)return'This Month';
+    if(goalViewOffset===-1)return'Last Month';
+    return`${GOAL_MON_NAMES[start.getMonth()]} ${start.getFullYear()}`;
+  }
+}
+function moveGoalView(dir){
+  const next=goalViewOffset+dir;
+  if(next>0)return; // no future periods
+  goalViewOffset=next;
+  renderGoalCard();
+}
+function getGoalProgress(){
+  const{start,end}=getGoalPeriodRange();
+  const s=start.getTime(),e=end.getTime();
+  const inRange=d=>{const t=new Date(d).getTime();return t>=s&&t<e;};
+  const cycling=
+    Object.values(S.history).flatMap(wh=>Object.values(wh.days||{}))
+      .filter(d=>d?.completedAt&&inRange(d.completedAt)).length+
+    (S.activityLog||[]).filter(en=>en.type==='cycling'&&inRange(en.date)).length;
+  const strength=(S.strHistory||[]).filter(h=>inRange(h.date)).length;
+  const boxing=(S.bxHistory||[]).filter(h=>inRange(h.date)).length;
+  return{cycling,strength,boxing,total:cycling+strength+boxing};
+}
+function makeSvgRing(current,goal,color,size,strokeW){
+  size=size||100;strokeW=strokeW||10;
+  const r=(size/2)-strokeW-2;
+  const cx=size/2,cy=size/2;
+  const circ=2*Math.PI*r;
+  const pct=goal>0?Math.min(current/goal,1):0;
+  const done=goal>0&&current>=goal;
+  const dashFill=(pct*circ).toFixed(2);
+  const fc=done?'var(--text)':color;
+  const tc=done?color:'var(--text)';
+  return`<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display:block;overflow:visible">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface2)" stroke-width="${strokeW}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${fc}" stroke-width="${strokeW}"
+      stroke-dasharray="${dashFill} ${circ.toFixed(2)}" stroke-linecap="round"
+      transform="rotate(-90 ${cx} ${cy})"/>
+    ${done?`<circle cx="${cx}" cy="${cy}" r="${r+strokeW/2+3}" fill="none" stroke="${color}" stroke-width="1.5" opacity=".3"/>`:''}
+    <text x="${cx}" y="${cy-size*0.06}" text-anchor="middle" dominant-baseline="middle"
+      font-size="${size*0.22}" font-weight="900" fill="${tc}" font-family="-apple-system,sans-serif">${current}</text>
+    <text x="${cx}" y="${cy+size*0.16}" text-anchor="middle" dominant-baseline="middle"
+      font-size="${size*0.11}" fill="var(--dim)" font-family="-apple-system,sans-serif">/ ${goal}</text>
+  </svg>`;
+}
+let goalsSettingsOpen=false;
+function toggleGoalSettings(){
+  goalsSettingsOpen=!goalsSettingsOpen;
+  renderGoalCard();
+}
+function setGoalMode(mode){
+  S.goals.mode=mode;renderGoalInputsUI();
+  document.getElementById('gtog-overall')?.classList.toggle('on',mode==='overall');
+  document.getElementById('gtog-bytype')?.classList.toggle('on',mode==='bytype');
+}
+function setGoalPeriod(period){
+  S.goals.period=period;goalViewOffset=0;
+  document.getElementById('gtog-weekly')?.classList.toggle('on',period==='weekly');
+  document.getElementById('gtog-monthly')?.classList.toggle('on',period==='monthly');
+  renderGoalCard();
+}
+function renderGoalInputsUI(){
+  const row=document.getElementById('goal-inputs-row');if(!row)return;
+  const g=S.goals;
+  if(g.mode==='overall'){
+    row.innerHTML=`<div class="goal-input-grp" style="flex:0 0 80px">
+      <div class="goal-input-lbl">Sessions</div>
+      <input class="goal-num" type="number" id="ginp-overall" min="1" max="30" value="${g.overall}"/>
+    </div>`;
+  } else {
+    row.innerHTML=`
+      <div class="goal-input-grp"><div class="goal-input-lbl" style="color:var(--blue)">Cycling</div>
+        <input class="goal-num" type="number" id="ginp-cycling" min="0" max="20" value="${g.cycling}"/></div>
+      <div class="goal-input-grp"><div class="goal-input-lbl" style="color:var(--orange)">Boxing</div>
+        <input class="goal-num" type="number" id="ginp-boxing" min="0" max="20" value="${g.boxing}"/></div>
+      <div class="goal-input-grp"><div class="goal-input-lbl" style="color:var(--lime)">Strength</div>
+        <input class="goal-num" type="number" id="ginp-strength" min="0" max="20" value="${g.strength}"/></div>`;
+  }
+}
+function saveGoals(){
+  const g=S.goals;
+  if(g.mode==='overall') g.overall=Math.max(1,parseInt(document.getElementById('ginp-overall')?.value)||5);
+  else{
+    g.cycling=Math.max(0,parseInt(document.getElementById('ginp-cycling')?.value)||0);
+    g.boxing=Math.max(0,parseInt(document.getElementById('ginp-boxing')?.value)||0);
+    g.strength=Math.max(0,parseInt(document.getElementById('ginp-strength')?.value)||0);
+  }
+  goalsSettingsOpen=false;saveState();renderGoalCard();
+}
+function renderGoalCard(){
+  const ringsArea=document.getElementById('goal-rings-area');
+  const settingsEl=document.getElementById('goal-settings');
+  const editBtn=document.getElementById('goal-edit-btn');
+  const periodChip=document.getElementById('goal-period-chip');
+  if(!ringsArea)return;
+  const g=S.goals;const prog=getGoalProgress();
+
+  // Period chip + nav
+  if(periodChip)periodChip.textContent=getGoalPeriodLabel();
+  const nextBtn=document.getElementById('goal-nav-next');
+  if(nextBtn){nextBtn.disabled=goalViewOffset>=0;nextBtn.style.opacity=goalViewOffset>=0?'.3':'1';}
+  if(editBtn)editBtn.classList.toggle('open',goalsSettingsOpen);
+  if(editBtn)editBtn.textContent=goalsSettingsOpen?'Done':'Edit';
+
+  // Rings
+  if(g.mode==='overall'){
+    const done=prog.total>=g.overall;
+    ringsArea.innerHTML=`<div class="goal-rings">
+      <div class="goal-ring-wrap">
+        ${makeSvgRing(prog.total,g.overall,'var(--lime)',120,12)}
+        <div class="goal-ring-lbl">${g.period==='weekly'?'This Week':'This Month'}</div>
+        ${done?'<div class="goal-ring-done">Goal Complete</div>':''}
+      </div>
+    </div>`;
+  } else {
+    const types=[
+      {key:'cycling',label:'Cycling',col:'var(--blue)',val:prog.cycling,goal:g.cycling},
+      {key:'boxing', label:'Boxing', col:'var(--orange)',val:prog.boxing,goal:g.boxing},
+      {key:'strength',label:'Strength',col:'var(--lime)',val:prog.strength,goal:g.strength},
+    ];
+    ringsArea.innerHTML=`<div class="goal-rings" style="gap:4px">
+      ${types.map(t=>`<div class="goal-ring-wrap">
+        ${makeSvgRing(t.val,t.goal,t.col,90,9)}
+        <div class="goal-ring-lbl" style="color:${t.col}">${t.label}</div>
+        ${t.val>=t.goal&&t.goal>0?'<div class="goal-ring-done">Done</div>':''}
+      </div>`).join('')}
+    </div>`;
+  }
+
+  // Settings
+  if(settingsEl){
+    settingsEl.style.display=goalsSettingsOpen?'block':'none';
+    if(goalsSettingsOpen){
+      // Sync toggles
+      ['overall','bytype'].forEach(m=>document.getElementById('gtog-'+m)?.classList.toggle('on',g.mode===m));
+      ['weekly','monthly'].forEach(p=>document.getElementById('gtog-'+p)?.classList.toggle('on',g.period===p));
+      renderGoalInputsUI();
+    }
+  }
 }
 
 // ── Weekly Summary ────────────────────────────────────────────────────────────
