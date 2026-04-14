@@ -352,6 +352,7 @@ html,body{background:var(--bg);color:var(--text);font-family:-apple-system,Blink
 .finput{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;outline:none;transition:border-color .15s;font-family:inherit}
 .finput:focus{border-color:var(--lime)}
 .rpe-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+input[type="date"].finput{color-scheme:dark;cursor:pointer}
 .rpe-btn{aspect-ratio:1;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--dim);font-size:12px;font-weight:800;cursor:pointer;transition:all .12s}
 .rpe-btn:hover{border-color:var(--lime);color:var(--lime)}.rpe-btn.sel{background:var(--lime);color:#000;border-color:var(--lime);box-shadow:0 0 10px rgba(204,255,0,.3)}
 .rpe-hint{font-size:12px;color:var(--dim);margin-top:6px;min-height:18px}
@@ -881,6 +882,10 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px
     </div>
     <div class="modal-body">
       <div class="fg">
+        <label class="flbl">Date <span style="color:var(--dim);font-weight:400;text-transform:none;letter-spacing:0">— change to backdate</span></label>
+        <input class="finput" type="date" id="inp-date"/>
+      </div>
+      <div class="fg">
         <label class="flbl">Rate of Perceived Exertion (RPE)</label>
         <div class="rpe-grid" id="rpe-grid"></div>
         <div class="rpe-hint" id="rpe-hint">Select RPE</div>
@@ -891,7 +896,7 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px
       </div>
       <div class="fg" style="margin-bottom:0">
         <label class="flbl">Notes</label>
-        <textarea class="finput" id="inp-notes" rows="3" placeholder="How did it feel?" style="resize:vertical"></textarea>
+        <textarea class="finput" id="inp-notes" rows="2" placeholder="How did it feel?" style="resize:vertical"></textarea>
       </div>
     </div>
     <div class="modal-footer">
@@ -2115,14 +2120,19 @@ function renderCalendar(){
 // ── Body Weight Log ───────────────────────────────────────────────────────────
 function saveBodyWeight(){
   const inp=document.getElementById('bw-input');
+  const dateInp=document.getElementById('bw-date');
   const val=parseFloat(inp.value);
   if(!val||val<50||val>600){showToast('','Invalid','Enter a weight between 50–600 lbs');return;}
-  const today=strTodayKey();
-  S.bodyLog=S.bodyLog.filter(e=>e.date!==today);
-  S.bodyLog.push({date:today,weight:val});
+  // Use selected date, or today if blank
+  const dateVal=dateInp?.value;
+  const dateKey=dateVal?new Date(dateVal+'T12:00:00').toDateString():strTodayKey();
+  S.bodyLog=S.bodyLog.filter(e=>e.date!==dateKey);
+  S.bodyLog.push({date:dateKey,weight:val});
+  S.bodyLog.sort((a,b)=>new Date(a.date)-new Date(b.date));
   if(S.bodyLog.length>90)S.bodyLog=S.bodyLog.slice(-90);
   saveState();renderBodyWeight();
-  showToast('','Weight Saved',`${val} lbs`);
+  const label=dateVal&&dateVal!==toDateInput(new Date())?` on ${dateVal}`:'';
+  showToast('','Weight Saved',`${val} lbs${label}`);
 }
 function renderBodyWeight(){
   const container=document.getElementById('bw-body');
@@ -2140,10 +2150,12 @@ function renderBodyWeight(){
     statsHtml=`<span style="font-size:11px;color:var(--dim);margin-left:auto">${sign}${diff} lbs overall &nbsp;<strong style="color:${col}">${last} lbs</strong></span>`;
   }
   container.innerHTML=`
-    <div class="bw-row">
+    <div class="bw-row" style="flex-wrap:wrap;gap:8px">
       <input class="bw-input" type="number" id="bw-input" placeholder="185" step="0.5" min="50" max="600"
         value="${todayEntry?todayEntry.weight:''}"/>
       <span class="bw-unit">lbs</span>
+      <input class="finput" type="date" id="bw-date" value="${toDateInput()}" max="${toDateInput()}"
+        style="flex:1;min-width:130px;font-size:13px;padding:8px 12px;color-scheme:dark"/>
       <button class="bw-save-btn" onclick="saveBodyWeight()">Save</button>
       ${statsHtml}
     </div>
@@ -2349,10 +2361,17 @@ function evaluateAchievements(){
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
+// Format a Date → "YYYY-MM-DD" for <input type="date">
+function toDateInput(d){d=d||new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+
 function openModal(day){
   const w=S.week;S.modalDay=day||S.activeDay;const existing=S.history[w]?.days?.[S.modalDay];
   S.modalRpe=existing?.rpe||0;
   document.getElementById('modal-title').textContent=`Log — ${DAY_LABELS[S.modalDay]}, Week ${w}`;
+  // Date field: pre-fill with existing completedAt date, or today
+  const existingDate=existing?.completedAt?new Date(existing.completedAt):new Date();
+  document.getElementById('inp-date').value=toDateInput(existingDate);
+  document.getElementById('inp-date').max=toDateInput(new Date()); // can't future-date
   document.getElementById('inp-hr').value=existing?.hr||'';
   document.getElementById('inp-notes').value=existing?.notes||'';
   const rg=document.getElementById('rpe-grid');rg.innerHTML='';
@@ -2364,10 +2383,13 @@ function closeModal(){document.getElementById('modal').classList.remove('open');
 function saveLog(){
   if(!S.modalRpe){alert('Please select an RPE value.');return;}
   const w=S.week,day=S.modalDay||S.activeDay,hr=document.getElementById('inp-hr').value,notes=document.getElementById('inp-notes').value;
+  const dateVal=document.getElementById('inp-date').value;
+  const completedAt=dateVal?new Date(dateVal+'T12:00:00').toISOString():new Date().toISOString();
   if(!S.history[w])S.history[w]={days:{}};
-  S.history[w].days[day]={rpe:S.modalRpe,hr,notes,completedAt:new Date().toISOString()};
+  S.history[w].days[day]={rpe:S.modalRpe,hr,notes,completedAt};
   const unlocked=evaluateAchievements();saveState();closeModal();render();
-  showToast('','Workout logged!',`Week ${w} · ${DAY_LABELS[day]}`);
+  const dateLabel=dateVal&&dateVal!==toDateInput(new Date())?` · ${dateVal}`:'';
+  showToast('','Workout logged!',`Week ${w} · ${DAY_LABELS[day]}${dateLabel}`);
   unlocked.forEach((a,i)=>setTimeout(()=>showToast(a.icon,'Achievement Unlocked!',a.title),(i+1)*700));
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('modal').classList.contains('open'))closeModal();});
