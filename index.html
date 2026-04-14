@@ -772,7 +772,13 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px
     </div>
     <!-- Weekly Summary -->
     <div class="week-summary">
-      <div class="week-sum-hdr" id="week-sum-hdr">This Week</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="week-sum-hdr" id="week-sum-hdr" style="margin-bottom:0">This Week</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="cal-nav-btn" onclick="moveSummaryWeek(-1)">‹</button>
+          <button class="cal-nav-btn" onclick="moveSummaryWeek(1)">›</button>
+        </div>
+      </div>
       <div class="week-sum-chips" id="week-sum-chips"></div>
       <div class="week-sum-pr" id="week-sum-pr" style="display:none"></div>
     </div>
@@ -818,20 +824,11 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px
       </div>
       <div class="panel">
         <div class="panel-hdr" onclick="togglePanel('hist')">
-          <div class="panel-title">Cycling History</div>
+          <div class="panel-title">All History <span id="hist-count" style="font-size:11px;font-weight:400;color:var(--dim)"></span></div>
           <span class="chev" id="hist-chev">▼</span>
         </div>
         <div class="panel-body hidden" id="hist-body">
           <div class="scroll-area" id="hist-list"></div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-hdr" onclick="togglePanel('bxhist')">
-          <div class="panel-title">Boxing History</div>
-          <span class="chev" id="bxhist-chev">▼</span>
-        </div>
-        <div class="panel-body hidden" id="bxhist-body">
-          <div class="scroll-area" id="bxhist-list"></div>
         </div>
       </div>
       <div class="panel" style="grid-column:1/-1">
@@ -1131,7 +1128,13 @@ function getStreak(){
   const full=Object.keys(S.history).map(Number).filter(w=>isWeekDone(w)).sort((a,b)=>b-a);
   if(!full.length)return 0;let s=0,e=full[0];for(const w of full){if(w===e){s++;e--;}else break;}return s;
 }
-function getTotalWorkouts(){return Object.values(S.history).flatMap(wl=>Object.values(wl.days||{})).length;}
+function getTotalWorkouts(){
+  const cycling=Object.values(S.history).flatMap(wl=>Object.values(wl.days||{})).length;
+  const strength=(S.strHistory||[]).length;
+  const boxing=(S.bxHistory||[]).length;
+  const backdated=(S.activityLog||[]).length;
+  return cycling+strength+boxing+backdated;
+}
 function getBoxing(week,day){
   const off={day1:0,day2:17,day3:34}[day]||0;
   return BOXING[((week-1+off)%BOXING.length+BOXING.length)%BOXING.length];
@@ -1507,23 +1510,12 @@ function render(){
   const ag=document.getElementById('ach-grid');ag.innerHTML='';
   S.achievements.forEach(a=>{const el=document.createElement('div');el.className='ach-item'+(a.earned?' earned':'');el.title=a.requirement;el.innerHTML=`<div class="ach-icon">${a.icon}</div><div><div class="ach-name">${a.title}</div><div class="ach-req">${a.requirement}</div></div>`;ag.appendChild(el);});
 
-  // Cycling History
-  const hl=document.getElementById('hist-list');hl.innerHTML='';
-  const weeks=Object.keys(S.history).map(Number).sort((a,b)=>b-a);
-  if(!weeks.length){hl.innerHTML='<div class="dim-txt" style="padding:16px;text-align:center">No workouts logged yet</div>';}
-  else weeks.forEach(wk=>{
-    const days=DAYS.filter(d=>S.history[wk]?.days?.[d]);
-    const logs=Object.values(S.history[wk]?.days||{});
-    const avgRpe=logs.length?(logs.reduce((s,l)=>s+(l.rpe||0),0)/logs.length).toFixed(1):'';
-    const row=document.createElement('div');row.className='hist-row';
-    row.innerHTML=`<div class="hist-week">Wk ${wk}</div><div style="display:flex;gap:5px">${days.map(d=>`<div class="hist-day-pill">${DAY_LABELS[d]}</div>`).join('')}</div>${avgRpe?`<div class="hist-rpe">RPE ${avgRpe}</div>`:''}`;
-    hl.appendChild(row);
-  });
+  // Combined all-workouts history
+  renderAllHistory();
 
-  // Calendar, body weight, boxing history, weekly summary, PRs
+  // Calendar, body weight, weekly summary, PRs
   renderCalendar();
   renderBodyWeight();
-  renderBxHistory();
   renderWeeklySummary();
   renderPRBoard();
 }
@@ -1538,7 +1530,7 @@ function renderStations(bx,allDone=false){
 
 
 // ── Navigation ────────────────────────────────────────────────────────────────
-function changeWeek(dir){const nw=S.week+dir;if(nw<1||nw>52)return;stopTimer();S.week=nw;saveState();resetBoxingTimer();render();}
+function changeWeek(dir){const nw=S.week+dir;if(nw<1||nw>52)return;stopTimer();S.week=nw;summaryWeek=null;saveState();resetBoxingTimer();render();}
 function selectDay(day){stopTimer();S.activeDay=day;render();}
 function selectBoxingDay(day){stopTimer();S.activeBoxingDay=day;resetBoxingTimer();render();}
 function switchWorkoutTab(tab){
@@ -1908,16 +1900,18 @@ function renderWeeklySummary(){
   const chips=document.getElementById('week-sum-chips');
   const prEl=document.getElementById('week-sum-pr');
   if(!hdr||!chips)return;
-  const w=S.week;
+  const w=summaryWeek!==null?summaryWeek:S.week;
+  const isCurrent=w===S.week;
   const cycDays=DAYS.filter(d=>S.history[w]?.days?.[d]).length;
+  // Boxing sessions have a week tag; strength sessions don't — use last 7 days for current week
+  const bxSess=(S.bxHistory||[]).filter(h=>h.week===w).length;
   const cutoff=new Date(Date.now()-7*864e5);
-  const strSess=(S.strHistory||[]).filter(h=>new Date(h.date)>=cutoff).length;
-  const bxSess=(S.bxHistory||[]).filter(h=>new Date(h.date)>=cutoff).length;
-  hdr.textContent=`Week ${w} Summary`;
+  const strSess=isCurrent?(S.strHistory||[]).filter(h=>new Date(h.date)>=cutoff).length:0;
+  hdr.textContent=isCurrent?`Week ${w} — Current`:`Week ${w}`;
   chips.innerHTML=[
-    {dot:'var(--blue)',label:`Cycling`,val:`${cycDays}/3`},
-    {dot:'var(--lime)',label:`Strength`,val:`${strSess} session${strSess!==1?'s':''}`},
-    {dot:'var(--orange)',label:`Boxing`,val:`${bxSess} session${bxSess!==1?'s':''}`},
+    {dot:'var(--blue)',label:'Cycling',val:`${cycDays}/3`},
+    {dot:'var(--lime)',label:'Strength',val:isCurrent?`${strSess} session${strSess!==1?'s':''}`:'—'},
+    {dot:'var(--orange)',label:'Boxing',val:`${bxSess} session${bxSess!==1?'s':''}`},
   ].map(c=>`<div class="week-sum-chip"><div class="week-sum-dot" style="background:${c.dot}"></div><span style="color:var(--dim)">${c.label}</span>&nbsp;${c.val}</div>`).join('');
   // Recent PRs
   const recentPRs=Object.entries(S.prs||{}).filter(([,v])=>new Date(v.date)>=cutoff);
@@ -2227,6 +2221,76 @@ function drawBwChart(entries){
       ctx.font='8px -apple-system,sans-serif';
     }
   });
+}
+
+// ── Combined All-History Render ───────────────────────────────────────────────
+function renderAllHistory(){
+  const hl=document.getElementById('hist-list');
+  if(!hl)return;
+  const TYPE_COL={cycling:'var(--blue)',strength:'var(--lime)',boxing:'var(--orange)',backdated:'var(--dim)'};
+  const entries=[];
+
+  // Cycling sessions
+  Object.entries(S.history).forEach(([week,wh])=>{
+    Object.entries(wh.days||{}).forEach(([day,log])=>{
+      if(!log)return;
+      const ts=log.completedAt?new Date(log.completedAt).getTime():0;
+      const dateStr=log.completedAt?new Date(log.completedAt).toDateString():'';
+      entries.push({ts,type:'cycling',col:TYPE_COL.cycling,
+        label:`Cycling — Wk ${week} ${DAY_LABELS[day]}`,
+        sub:log.rpe?`RPE ${log.rpe}`:'',date:dateStr});
+    });
+  });
+
+  // Strength sessions
+  (S.strHistory||[]).forEach(h=>{
+    entries.push({ts:h.ts||new Date(h.date).getTime(),type:'strength',col:TYPE_COL.strength,
+      label:`Strength — ${h.title}`,
+      sub:h.totalSets?`${h.totalSets} sets`:h.backdated?'Backdated':'',
+      date:h.date});
+  });
+
+  // Boxing sessions
+  (S.bxHistory||[]).forEach(h=>{
+    entries.push({ts:h.ts||new Date(h.date).getTime(),type:'boxing',col:TYPE_COL.boxing,
+      label:`Boxing — ${h.title}`,
+      sub:h.backdated?'Backdated':`Wk ${h.week}`,date:h.date});
+  });
+
+  // Backdated activity log
+  (S.activityLog||[]).forEach(e=>{
+    const label=e.type.charAt(0).toUpperCase()+e.type.slice(1);
+    entries.push({ts:e.ts||new Date(e.date).getTime(),type:e.type,col:TYPE_COL[e.type]||TYPE_COL.backdated,
+      label:`${label} — Backdated`,sub:'',date:e.date});
+  });
+
+  entries.sort((a,b)=>b.ts-a.ts);
+
+  // Update count badge
+  const hc=document.getElementById('hist-count');
+  if(hc)hc.textContent=entries.length?`${entries.length} sessions`:'';
+
+  if(!entries.length){hl.innerHTML='<div class="dim-txt" style="padding:16px;text-align:center">No workouts logged yet</div>';return;}
+
+  hl.innerHTML=entries.slice(0,60).map(e=>`
+    <div class="hist-row" style="gap:10px">
+      <div style="width:7px;height:7px;border-radius:50%;background:${e.col};flex-shrink:0;margin-top:4px"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.label}</div>
+        ${e.sub?`<div style="font-size:10px;color:var(--dim)">${e.sub}</div>`:''}
+      </div>
+      <div style="font-size:10px;color:var(--dim);white-space:nowrap;flex-shrink:0">${e.date?e.date.split(' ').slice(1,3).join(' '):''}</div>
+    </div>`).join('');
+}
+
+// ── Weekly Summary Navigation ─────────────────────────────────────────────────
+let summaryWeek=null; // null = follow S.week
+function moveSummaryWeek(dir){
+  const cur=summaryWeek!==null?summaryWeek:S.week;
+  const nw=cur+dir;
+  if(nw<1||nw>52)return;
+  summaryWeek=nw;
+  renderWeeklySummary();
 }
 
 // ── Boxing History Render ─────────────────────────────────────────────────────
