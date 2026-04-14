@@ -353,6 +353,10 @@ html,body{background:var(--bg);color:var(--text);font-family:-apple-system,Blink
 .finput:focus{border-color:var(--lime)}
 .rpe-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
 input[type="date"].finput{color-scheme:dark;cursor:pointer}
+.date-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);margin-bottom:16px}
+.date-row-lbl{font-size:11px;font-weight:700;color:var(--dim);white-space:nowrap}
+.date-row-input{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:6px 10px;color:var(--text);font-size:12px;font-weight:600;outline:none;font-family:inherit;transition:border-color .15s;color-scheme:dark;cursor:pointer;max-width:160px;min-width:0;flex-shrink:0}
+.date-row-input:focus{border-color:var(--lime)}
 .rpe-btn{aspect-ratio:1;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--dim);font-size:12px;font-weight:800;cursor:pointer;transition:all .12s}
 .rpe-btn:hover{border-color:var(--lime);color:var(--lime)}.rpe-btn.sel{background:var(--lime);color:#000;border-color:var(--lime);box-shadow:0 0 10px rgba(204,255,0,.3)}
 .rpe-hint{font-size:12px;color:var(--dim);margin-top:6px;min-height:18px}
@@ -881,9 +885,9 @@ code{font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px
       <button class="btn-icon" onclick="closeModal()" style="width:30px;height:30px;font-size:14px">✕</button>
     </div>
     <div class="modal-body">
-      <div class="fg">
-        <label class="flbl">Date <span style="color:var(--dim);font-weight:400;text-transform:none;letter-spacing:0">— change to backdate</span></label>
-        <input class="finput" type="date" id="inp-date"/>
+      <div class="date-row">
+        <span class="date-row-lbl">Date <span style="font-weight:400;opacity:.6">(tap to backdate)</span></span>
+        <input class="date-row-input" type="date" id="inp-date"/>
       </div>
       <div class="fg">
         <label class="flbl">Rate of Perceived Exertion (RPE)</label>
@@ -2154,8 +2158,7 @@ function renderBodyWeight(){
       <input class="bw-input" type="number" id="bw-input" placeholder="185" step="0.5" min="50" max="600"
         value="${todayEntry?todayEntry.weight:''}"/>
       <span class="bw-unit">lbs</span>
-      <input class="finput" type="date" id="bw-date" value="${toDateInput()}" max="${toDateInput()}"
-        style="flex:1;min-width:130px;font-size:13px;padding:8px 12px;color-scheme:dark"/>
+      <input class="date-row-input" type="date" id="bw-date" value="${toDateInput()}" max="${toDateInput()}"/>
       <button class="bw-save-btn" onclick="saveBodyWeight()">Save</button>
       ${statsHtml}
     </div>
