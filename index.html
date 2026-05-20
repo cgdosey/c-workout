@@ -151,6 +151,9 @@ html,body{background:var(--bg);color:var(--text);font-family:-apple-system,Blink
 .wcard-yt{width:36px;height:36px;border-radius:10px;background:#e00;display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;transition:background .15s}
 .wcard-yt:hover{background:#c00}
 .wcard-yt svg{width:13px;height:13px;fill:#fff;margin-left:2px}
+/* ── Next-up cycling session ── */
+.workout-card.next-up{box-shadow:0 0 0 2px rgba(142,202,230,.45),var(--card-shadow)}
+.wcard-next-badge{display:inline-flex;align-items:center;gap:5px;background:var(--blue);color:#0a0a0a;font-size:9px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:6px;margin-bottom:6px}
 
 /* ── BOXING TAB ───────────────────────────────────── */
 .bx-hero{padding:20px 0 10px}
@@ -2034,13 +2037,16 @@ function render(){
   // Workout grid — all 3 days
   const DAY_TYPE={day1:'HIIT',day2:'Endurance',day3:'Power'};
   const grid=document.getElementById('workout-grid');grid.innerHTML='';
+  // Find the next-up session for this week (first unlogged, in order)
+  const nextUp=DAYS.find(d=>!S.history[w]?.days?.[d]);
   DAYS.forEach(day=>{
     const vid=getVideo(w,day);
     const log=S.history[w]?.days?.[day];
+    const isNextUp=!log&&day===nextUp;
     const ytUrl=`https://www.youtube.com/watch?v=${vid.id}`;
     const thumb=`https://img.youtube.com/vi/${vid.id}/hqdefault.jpg`;
     const card=document.createElement('div');
-    card.className='workout-card'+(log?' logged':'');
+    card.className='workout-card'+(log?' logged':'')+(isNextUp?' next-up':'');
     card.innerHTML=`
       <div class="wcard-day-badge">${DAY_LABELS[day]} — ${DAY_TYPE[day]}</div>
       <div class="wcard-thumb" onclick="openInlineVideo(this,'${vid.id}')">
@@ -2049,6 +2055,7 @@ function render(){
         ${log?'<div class="wcard-done-badge">✓ Done</div>':''}
       </div>
       <div class="wcard-body">
+        ${isNextUp?'<div class="wcard-next-badge">▶ Next Up</div>':''}
         <div class="wcard-title">${vid.title}</div>
         <div class="wcard-sub">⏱ ${vid.duration} · ${phase.name}</div>
         <div class="wcard-footer">
@@ -2894,10 +2901,36 @@ function planCountPerfectWeeks(){
   return count;
 }
 
+// Returns {week, day} for the next unlogged cycling session in the program
+function getNextCyclingSession(){
+  const w=S.week;
+  // Check current week for any unlogged day, in order
+  for(const day of DAYS){
+    if(!S.history[w]?.days?.[day]) return {week:w, day};
+  }
+  // Current week fully done — advance to next (cap at 52)
+  const nextW=Math.min(52,w+1);
+  return {week:nextW, day:'day1'};
+}
+
 function planLaunchWorkout(type){
   if(type==='strength') switchWorkoutTab('strength');
   else if(type==='boxing') switchWorkoutTab('boxing');
-  else if(type==='cycling') switchWorkoutTab('cycling');
+  else if(type==='cycling'){
+    const next=getNextCyclingSession();
+    // Advance week if all sessions for current week are complete
+    if(next.week!==S.week){
+      S.week=next.week;
+      saveState();
+    }
+    S.activeDay=next.day;
+    switchWorkoutTab('cycling');
+    // Scroll the next-up card into view after render
+    setTimeout(()=>{
+      const el=document.querySelector('.workout-card.next-up');
+      if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
+    },150);
+  }
 }
 
 function renderPlan(){
@@ -2943,14 +2976,21 @@ function renderPlan(){
     const isRest=todayPlan.type==='rest';
     const dayName=PLAN_DAY_LABELS[todayDow];
     const dateStr=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    // Strength rotation detail
+    // Specific workout name for each type
     let subTitle=meta.title;
+    let extraDesc='';
     if(todayPlan.type==='strength'){
       const strDays=S.planDays.map((p,i)=>p.type==='strength'?i:-1).filter(i=>i>=0);
       const slotPos=strDays.indexOf(todayDow);
       const rot=planGetCurrentRotation();
       const rotSlot=rot[slotPos%rot.length];
       if(rotSlot) subTitle=STRENGTH[rotSlot.wIdx].title;
+    }
+    if(todayPlan.type==='cycling'){
+      const next=getNextCyclingSession();
+      const vid=getVideo(next.week,next.day);
+      subTitle=vid.title;
+      extraDesc=`Week ${next.week} · ${DAY_LABELS[next.day]} · ${vid.duration}`;
     }
     let actionHtml='';
     if(isDone){
@@ -2963,7 +3003,7 @@ function renderPlan(){
     todaySection.innerHTML=`<div class="plan-today-card ${todayPlan.type}">
       <div class="plan-today-eyebrow"><span class="plan-today-eyebrow-dot"></span>TODAY · ${dayName}, ${dateStr}</div>
       <div class="plan-today-title">${subTitle}</div>
-      <div class="plan-today-desc">${meta.desc}</div>
+      <div class="plan-today-desc">${extraDesc||meta.desc}</div>
       ${actionHtml}
     </div>`;
   }
@@ -3026,12 +3066,19 @@ function renderPlan(){
       const isPast=d<now&&!isToday;
       const done=planGetDoneTypes(dk);
       const isDone=done.has(p.type);
-      // Strength rotation label
-      let extra='';
+      // Specific workout labels per type
+      let displayTitle=meta.title;
+      let displayDesc=meta.desc;
       if(p.type==='strength'){
         const slotPos=strDays.indexOf(i);
         const rotSlot=rot[slotPos%rot.length];
-        if(rotSlot) extra=` · ${STRENGTH[rotSlot.wIdx].title}`;
+        if(rotSlot) displayTitle=STRENGTH[rotSlot.wIdx].title;
+      }
+      if(p.type==='cycling'){
+        const next=getNextCyclingSession();
+        const vid=getVideo(next.week,next.day);
+        displayTitle=vid.title;
+        displayDesc=`Week ${next.week} · ${DAY_LABELS[next.day]} · ${vid.duration}`;
       }
       const statusIcon=isDone?'✓':isToday&&p.required?'▶':isPast&&p.required&&!isDone?'✗':'';
       const statusColor=isDone?'var(--lime)':isToday&&p.required?'var(--lime)':isPast&&p.required&&!isDone?'var(--red)':'var(--dim)';
@@ -3039,8 +3086,8 @@ function renderPlan(){
         <div class="plan-day-icon ${p.type}">${meta.icon}</div>
         <div class="plan-day-body">
           <div class="plan-day-name">${PLAN_DAY_LABELS[i]}</div>
-          <div class="plan-day-title">${meta.title}${extra}</div>
-          <div class="plan-day-desc">${meta.desc}</div>
+          <div class="plan-day-title">${displayTitle}</div>
+          <div class="plan-day-desc">${displayDesc}</div>
           <span class="plan-day-badge ${p.required&&p.type!=='rest'?'required':'optional'}">${p.required&&p.type!=='rest'?'Required':'Optional'}</span>
         </div>
         <div class="plan-day-status" style="color:${statusColor}">${statusIcon}</div>
